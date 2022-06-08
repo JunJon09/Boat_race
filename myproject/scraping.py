@@ -1,162 +1,174 @@
+from statistics import variance
 import urllib.request
 import pandas as pd
 import sys, pprint
 from bs4 import BeautifulSoup
 import re
 import time
+import math
+import pickle
 def scarpe():
-    #とりあえず津のページの最新を表示
-    f =  urllib.request.urlopen('https://kyotei.sakura.ne.jp/kako_stdm-tsu.html')
-    #fをいつも書くhtmlに変換
-    codeText = f.read().decode("utf-8")
-    
-    soup = BeautifulSoup(codeText, 'html.parser')
-    more_info_url_tmp = []
-    #日付を取る
-    for link in soup.find_all('strong'):
-        #"https://race.kyotei.club/info/info-20220601-09-1.html"
-        #:https://race.kyotei.club/info/20220601-09-1.html"
-        day = re.sub(r"\D", "", link.text)
-        #次のURLに飛ぶ準備
-        
-        more_info_url_tmp.append("https://race.kyotei.club/info/info-" + day + "-09-")
-    
+    week = '20220601'
     list_std = ['艇番', '名前', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級', '展示タイム', 'スタート展示', '天気', '順位']
-    
-    df =[  [1],
-            [2],
-            [3],
-            [4],
-            [5],
-            [6]
-        ]
-    #12レースあるから
-    for link in more_info_url_tmp:
-        for x in range(12):
-            data = link + str(x+1) + '.html'
-            
-            
-            #ここで順位表を取れるとこまでできた。
-            f =  urllib.request.urlopen(data)
-            codeText = f.read().decode("utf-8")
-            soup = BeautifulSoup(codeText, 'html.parser')
-            found = soup.find('div', class_='race_list_box_table')
-            found = found.find_all('tr')
-            
-            #氏名
-            names = found[1].find_all('span')
-            for i,name in enumerate(names):
-                if(i % 4 == 0):
-                    df[int(i/4)].append(name.text.replace('\u3000', ''))
-                    
-            #全国の2連率と全国の勝率
-            natonal_two = found[21].find_all('div') 
-            for i, n in enumerate(natonal_two):
-                if(i%3==0):
-                    df[int(i/3)].append(float(n.text))
-                if(i%3==2):
-                    df[int(i/3)].append(float(n.text))
-            
-            #当地の2連率と勝率
-            locational_two = found[22].find_all('div') 
-            for i, n in enumerate(locational_two):
-                if(i%3==0):
-                    df[int(i/3)].append(float(n.text))
-                if(i%3==2):
-                    df[int(i/3)].append(float(n.text))
-                    
-            #モータの2連率
-            motor_two = found[23].find_all('span')
-            for i, n in enumerate(motor_two):
-                df[i].append(float(n.text))
-                
-            #ボートの2連率
-            boat_two = found[24].find_all('span')
-            for i, n in enumerate(boat_two):
-                df[i].append(float(n.text))
-            
-            #級 A1=1 A2=2 A3=3 B1=4 B2=5
-            count = 0
-            for i in range(9, 20, 2):
-                n = found[i].text.replace('\n', '')
-                if(n == 'A1'):
-                    n = 1
-                elif(n == 'A2'):
-                    n = 2
-                elif(n == 'A3'):
-                    n = 3
-                elif(n == 'B1'):
-                    n = 4
-                else:
-                    n = 5
-                df[count].append(n)
-                count += 1
-                
-            #展示タイム
-            before_time = found[6].find_all('div')
-            for i, n in enumerate(before_time):
-                n = n.text.strip()
-                df[i].append(float(n))
-            time.sleep(1)
-            
-            #着順
-            #最後に代入する
-            arrive = found[3].find_all('div')
-           
-            
-            # 直前予想編   
-            #https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=09&hd=20220601      
-                    
-            
-            target = 'info/'
-            idx = link.find(target)
-            r = link[idx+10:idx+18]
-            data = "https://boatrace.jp/owpc/pc/race/beforeinfo?rno=" + str(x+1) + '&jcd=09&hd=' + r
-            f =  urllib.request.urlopen(data)
-            codeText = f.read().decode("utf-8")
-            soup = BeautifulSoup(codeText, 'html.parser')
-            
-            found = soup.find_all('span', class_='table1_boatImage1Time')
-            
-            #スタート展示
-            for i, n in enumerate(found):
-                n = n.text
-                if 'F' in n:
-                    n = n.replace('F', '-')
-                n = n.replace('.', '0.')
-                #1.1の時10.1になる.普通.11→0.11
-                if float(n) >= 10.0 or float(n) <= -10.0:
-                    n = n.replace('0.', '.')
-                df[i].append(float(n))
-                
-            #天気
-            found = soup.find_all('div', class_='weather1_bodyUnitLabel')
-            wether = found[1].text.strip()
-            if wether == '晴れ':
-                wether = 0
-            elif wether == '曇り':
-                wether = 1
-            elif wether == '雨':
-                wether = 2
-            elif wether == '風':
-                wether = 3
-            elif wether == '雪':
-                wether = 4
-            else:
-                wether = 5
-            for i in range(6):
-                df[i].append(wether)
-           
-            
+    all_data = []
+    #とりあえず津のページの最新を表示
+    for i in range(100):
+        url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-09-' + week +'.html'
+        f =  urllib.request.urlopen(url)
+        time.sleep(1)
+        #fをいつも書くhtmlに変換
+        codeText = f.read().decode("utf-8")
 
-            #前取ってあった着順を代入
-            for i, n in enumerate(arrive):
-                n = n.text.strip()
-                df[i].append(int(n))
-           
-            print(df)
-            time.sleep(1)
+        soup = BeautifulSoup(codeText, 'html.parser')
+        more_info_url_tmp = []
+        #日付を取る
+        for i, link in enumerate(soup.find_all('strong')):
+            if(i == len(soup.find_all('strong'))-1):
+                url = re.sub(r"\D", "", link.text)
+                continue
+            #"https://race.kyotei.club/info/info-20220601-09-1.html"
+            #:https://race.kyotei.club/info/20220601-09-1.html"
+            day = re.sub(r"\D", "", link.text)
+            #次のURLに飛ぶ準備
+            more_info_url_tmp.append("https://race.kyotei.club/info/info-" + day + "-09-")
             
+        #12レースあるから
+        for link in more_info_url_tmp:
+            for x in range(12):
+                df =[  [1],
+                [2],
+                [3],
+                [4],
+                [5],
+                [6]
+                ]
+                data = link + str(x+1) + '.html'
+                
+                
+                #ここで順位表を取れるとこまでできた。
+                f =  urllib.request.urlopen(data)
+                codeText = f.read().decode("utf-8")
+                soup = BeautifulSoup(codeText, 'html.parser')
+                found = soup.find('div', class_='race_list_box_table')
+                found = found.find_all('tr')
+                
+                #氏名
+                names = found[1].find_all('span')
+                for i,name in enumerate(names):
+                    if(i % 4 == 0):
+                        df[int(i/4)].append(name.text.replace('\u3000', ''))
+                        
+                #全国の2連率と全国の勝率
+                natonal_two = found[21].find_all('div')
+                df = two_world(natonal_two, df)
+                
+                #当地の2連率と勝率
+                locational_two = found[22].find_all('div') 
+                df = two_world(locational_two, df)
+                        
+                #モータの2連率
+                motor_two = found[23].find_all('span')
+                df = boat_motor(motor_two, df)
+                    
+                #ボートの2連率
+                boat_two = found[24].find_all('span')
+                df = boat_motor(boat_two, df)
+                
+                #級 A1=1 A2=2 A3=3 B1=4 B2=5
+                count = 0
+                for i in range(9, 20, 2):
+                    n = found[i].text.replace('\n', '')
+                    if(n == 'A1'):
+                        n = 1
+                    elif(n == 'A2'):
+                        n = 2
+                    elif(n == 'A3'):
+                        n = 3
+                    elif(n == 'B1'):
+                        n = 4
+                    else:
+                        n = 5
+                    df[count].append(n)
+                    count += 1
+                    
+                #展示タイム
+                before_time = found[6].find_all('div')
+                for i, n in enumerate(before_time):
+                    n = n.text.strip()
+                    df[i].append(float(n))
+                time.sleep(1)
+                
+                #着順
+                #最後に代入する
+                arrive = found[3].find_all('div')
+                
+                
+                # 直前予想編   
+                #https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=09&hd=20220601      
+                        
+                
+                target = 'info/'
+                idx = link.find(target)
+                r = link[idx+10:idx+18]
+                data = "https://boatrace.jp/owpc/pc/race/beforeinfo?rno=" + str(x+1) + '&jcd=09&hd=' + r
+                f =  urllib.request.urlopen(data)
+                codeText = f.read().decode("utf-8")
+                soup = BeautifulSoup(codeText, 'html.parser')
+                
+                found = soup.find_all('span', class_='table1_boatImage1Time')
+                
+                #スタート展示
+                for i, n in enumerate(found):
+                    n = n.text
+                    if 'F' in n:
+                        n = n.replace('F', '-')
+                    n = n.replace('.', '0.')
+                    #1.1の時10.1になる.普通.11→0.11
+                    if float(n) >= 10.0 or float(n) <= -10.0:
+                        n = n.replace('0.', '.')
+                    df[i].append(float(n))
+                    
+                #天気
+                found = soup.find_all('div', class_='weather1_bodyUnitLabel')
+                wether = found[1].text.strip()
+                if wether == '晴れ':
+                    wether = 0
+                elif wether == '曇り':
+                    wether = 1
+                elif wether == '雨':
+                    wether = 2
+                elif wether == '風':
+                    wether = 3
+                elif wether == '雪':
+                    wether = 4
+                else:
+                    wether = 5
+                for i in range(6):
+                    df[i].append(wether)
+                
+                
+
+                #前取ってあった着順を代入
+                for i, n in enumerate(arrive):
+                    n = n.text.strip()
+                    if (n!='失格' and n!='棄権'): 
+                        df[i].append(int(n))
+                        all_data.append(df)
+                
+                print(df)
+                
+                df = []
+                
+                time.sleep(1)
+    print("終了")
+    with open('school.binaryfile', 'wb') as web:
+        pickle.dump(all_data, web)
+                    
+    # with open('school.binaryfile', 'rb') as web:
+    #     techacademy = pickle.load(web)
+    #     print(techacademy)
+    
+                
             
             
     
@@ -169,6 +181,38 @@ def scarpe():
     
     #艇番 名前 全国2連率 全国勝率 当地勝率 当地2連率 モータ2連率 ボード2連率 級 展示タイム スタート展示 天気 着順
     
-   
+    
+def  deviation_value(scores, df):
+    hensachi = []
+    average = sum(scores) / len(scores)
+    zure_sum = 0
+    for score in scores:
+        zure = round((score - average)**2, 1)
+        zure_sum += zure
+    variance = zure_sum/len(scores)
+    standard_deviation = math.sqrt(variance)
+    for score in scores:
+        hensachi.append(round(((score-average)/standard_deviation)*10 + 50, 1))
+    for i, n in enumerate(hensachi):
+        df[i].append(n)
+    return df
     
     
+def two_world(html, df):
+    deviation = []
+    tmp = []
+    for i, n in enumerate(html):
+        if(i%3 == 0):
+            deviation.append(float(n.text))
+        if(i%3 == 2):
+            tmp.append(float(n.text))
+    df = deviation_value(deviation, df)
+    df = deviation_value(tmp, df)
+    return df
+
+def boat_motor(html, df):
+    deviation = []
+    for i, n in enumerate(html):
+        deviation.append(float(n.text))
+    df = deviation_value(deviation, df)
+    return df
