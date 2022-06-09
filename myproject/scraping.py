@@ -27,7 +27,7 @@ def scarpe():
         #日付を取る
         for i, link in enumerate(soup.find_all('strong')):
             if(i == len(soup.find_all('strong'))-1):
-                url = re.sub(r"\D", "", link.text)
+                week = re.sub(r"\D", "", link.text)
                 continue
             #"https://race.kyotei.club/info/info-20220601-09-1.html"
             #:https://race.kyotei.club/info/20220601-09-1.html"
@@ -167,8 +167,9 @@ def scarpe():
                 finally:
                     print(df)
                     df = []
-                    
+        print('-'*100)           
     print("終了")
+    print(week)
     with open('boat-tsu.binaryfile', 'wb') as web:
         pickle.dump(all_data, web)
                     
