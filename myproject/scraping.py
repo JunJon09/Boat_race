@@ -13,11 +13,11 @@ import pickle
 
 def scarpe():
     week = '20220601'
-    list_std = ['艇番', '名前', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級', '展示タイム', 'スタート展示', '天気', '順位']
+    list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位']
     all_data = []
     #とりあえず津のページの最新を表示
     print('start')
-    for i in range(2):
+    for i in range(100):
         url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-09-' + week +'.html'
         f =  urllib.request.urlopen(url)
         time.sleep(1)
@@ -57,11 +57,7 @@ def scarpe():
                     found = soup.find('div', class_='race_list_box_table')
                     found = found.find_all('tr')
                     
-                    #氏名
-                    names = found[1].find_all('span')
-                    for i,name in enumerate(names):
-                        if(i % 4 == 0):
-                            df[int(i/4)].append(name.text.replace('\u3000', ''))
+                    time.sleep(1)
                             
                     #全国の2連率と全国の勝率
                     natonal_two = found[21].find_all('div')
@@ -116,9 +112,10 @@ def scarpe():
                     f =  urllib.request.urlopen(data)
                     codeText = f.read().decode("utf-8")
                     soup = BeautifulSoup(codeText, 'html.parser')
-                    found = soup.find_all('span', class_='table1_boatImage1Time')
-                    
+                    time.sleep(1)
+                        
                     #スタート展示
+                    found = soup.find_all('span', class_='table1_boatImage1Time')
                     for i, n in enumerate(found):
                         n = n.text
                         if 'F' in n:
@@ -128,6 +125,9 @@ def scarpe():
                         if float(n) >= 10.0 or float(n) <= -10.0:
                             n = n.replace('0.', '.')
                         df[i].append(float(n))
+                        
+                   
+                    
                         
                     #天気'晴れ'=1,'曇り'=2, '雨'=3, '風'=4, '雪'=5
                     found = soup.find_all('div', class_='weather1_bodyUnitLabel')
@@ -146,13 +146,24 @@ def scarpe():
                         wether = 5
                     for i in range(6):
                         df[i].append(wether)
+                        
+                    #https://boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=09&hd=20220427
+                    #レーサ番号
+                    data = "https://boatrace.jp/owpc/pc/race/raceresult?rno=" + str(x+1) + '&jcd=09&hd=' + r
+                    f =  urllib.request.urlopen(data)
+                    codeText = f.read().decode("utf-8")
+                    soup = BeautifulSoup(codeText, 'html.parser')
+                    time.sleep(1)
+                    found = soup.find_all('span', class_='is-fs12')
+                    for i, n in enumerate(found):
+                        n = n.text.strip()
+                        df[i].append(int(n))
                 
                     #前取ってあった着順を代入
                     for i, n in enumerate(arrive):
                         n = n.text.strip()
                         df[i].append(int(n))
                 
-                    time.sleep(1)
                 except Exception as e:
                     print(e)
                     print(link)
@@ -163,7 +174,7 @@ def scarpe():
         print('-'*100)           
     print("終了")
     print(week)
-    with open('boat-tsu.binaryfile', 'wb') as web:
+    with open('boat-tsu_handred.binaryfile', 'wb') as web:
         pickle.dump(all_data, web) 
         
 #偏差値

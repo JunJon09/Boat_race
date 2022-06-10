@@ -1,11 +1,13 @@
 from scraping import scarpe
-import pickle
+from predicting import predict
+
 if __name__ == '__main__':
     #スクレピング
-    #scarpe()
-    with open('boat-tsu.binaryfile', 'rb') as web:
-        boat_tsu = pickle.load(web)
-        print(boat_tsu)   
+    scarpe()
+    
+    #予測
+    #predict()
+      
 
     
    
