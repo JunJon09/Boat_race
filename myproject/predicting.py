@@ -3,6 +3,9 @@ import pickle
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
+from sklearn import metrics
+import numpy as np
+
 
 def predict():
   with open('boat-tsu.binaryfile', 'rb') as web:
@@ -27,39 +30,29 @@ def predict():
       learn = learn.append(tmp_learn, ignore_index=True)
       result = result.append(tmp_result, ignore_index=True)
   
-  pd.set_option('display.max_rows', None)
-  print(learn)
-  train_X, test_X, train_Y, test_Y = train_test_split(learn, result,                # 訓練データとテストデータに分割する
-                                                    test_size=0.3,       # テストデータの割合
-                                                    shuffle=True,        # シャッフルする
-                                                    random_state=0)      # 乱数シードを固定する
-  lgb_train = lgb.Dataset(train_X, train_Y)
-  lgb_test = lgb.Dataset(test_X, test_Y, reference=lgb_train)
   
-  lgbm_params =  {
-    'task': 'train',
-    'boosting_type': 'gbdt',
-    'objective': 'lambdarank', #←ここでランキング学習と指定！
-    'metric': 'ndcg',   # for lambdarank
-    'ndcg_eval_at': [1,2,3],  # 3連単を予測したい
-    'max_position': 6,  # 競艇は6位までしかない
-    'learning_rate': 0.01, 
-    'min_data': 1,
-    'min_data_in_bin': 1,
-#     'num_leaves': 31,
-#     'min_data_in_leaf': 20,
-#     'max_depth':35,
-  }
+  train_x, test_x, train_y, test_y = train_test_split(learn, result, random_state=1)
+  lgb_train = lgb.Dataset(train_x, train_y)
+  lgb_eval = lgb.Dataset(test_x, test_y, reference=lgb_train)
+  parms = {
+    'task': 'train', #トレーニング用
+    'boosting': 'gbdt', #勾配ブースティング決定木
+    'objective': 'multiclass', #目的：多値分類
+    'num_class': 11 , #分類するクラス数
+    'metric': 'multi_error', #評価指標：正答率
+    'num_iterations': 1000, #1000回学習
+    'verbose': -1 #学習情報を非表示
+  }   
   
-  lgtrain = lgb.Dataset(train_X, train_Y)
-  lgvalid = lgb.Dataset(test_X, test_Y)
-  lgb_clf = lgb.train(
-      lgbm_params,
-      lgtrain,
-      num_boost_round=250,
-      valid_sets=[lgtrain, lgvalid],
-      valid_names=['train','valid'],
-      early_stopping_rounds=20,
-      verbose_eval=5
-  )
-  y_pred = lgb_clf.predict(val_onehot,group=val_group, num_iteration=lgb_clf.best_iteration)
+  model = lgb.train(parms,
+                 #訓練データ
+                 train_set=lgb_train,
+                 # 評価データ
+                 valid_sets=lgb_eval,
+                 early_stopping_rounds=100)
+  
+  y_pred = model.predict(test_x)
+# 予測確率を整数へ
+  y_pred = np.argmax(y_pred, axis=1) 
+
+  print(metrics.classification_report(test_y, y_pred))

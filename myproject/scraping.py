@@ -174,7 +174,7 @@ def scarpe():
         print('-'*100)           
     print("終了")
     print(week)
-    with open('boat-tsu_handred.binaryfile', 'wb') as web:
+    with open('boat-tsu_hundred.binaryfile', 'wb') as web:
         pickle.dump(all_data, web) 
         
 #偏差値
