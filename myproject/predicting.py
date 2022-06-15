@@ -1,28 +1,58 @@
+from statistics import mode
 import pandas as pd
 import pickle
-import lightgbm as lgb
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-from sklearn import metrics
 import numpy as np
 
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import RMSprop
+from keras.optimizers import Adam
+
+from tensorflow.keras.callbacks import EarlyStopping
 
 def predict():
-  with open('boat-tsu.binaryfile', 'rb') as web:
+  with open('boat-tsu_two.binaryfile', 'rb') as web:
     boat_tsu = pickle.load(web)
   
-  list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級', '展示タイム', 'スタート展示', '天気']
+  list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号']
   
   result_std = ['順位']
-  le = preprocessing.LabelEncoder()
-  #行
+  
+  y_label = ["1.0", "2.0", "3.0", "4.0", "5.0", "6.0"]
+  x, y = split_train_test(boat_tsu, list_std, result_std)
+  
+  x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+  print(y_train)
+  y_train = one_hot_encode(y_train, y_label)
+  y_test = one_hot_encode(y_test, y_label)
+  print(y_train)
+  model = Sequential()
+  model.add(Dense(132, input_shape=(x_train.shape[1],), activation='relu'))
+  model.add(Dropout(0.36))
+  model.add(Dense(200, activation='relu'))
+  model.add(Dropout(0.49))
+  model.add(Dense(200, activation='relu'))
+  model.add(Dropout(0.49))
+  model.add(Dense(y_train.shape[1], activation='softmax'))
+  model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+  
+  early_stopping = EarlyStopping(patience=10, verbose=1)
+  model.fit(x_train, y_train, batch_size=50, verbose=0, epochs=100, validation_split=0.1, callbacks=[early_stopping])
+  
+  score = model.evaluate(x_test, y_test, verbose=1)
+  print("Test loss:",score[0])
+  print("Test accuracy:",score[1])
+  print('Finish')
+  print(score)
+  
+ 
+#訓練データとテストデータをわける。
+def split_train_test(boat_tsu, list_std, result_std):
   learn = pd.DataFrame(index=[])
   result = pd.DataFrame(index=[])
   for n in boat_tsu:
     for i in n:
-      # labels_id = le.fit_transform(i)
-      # i[1] = labels_id[1]
-      i.pop(1)
       a = i.pop(-1)
       b = i
       tmp_learn =  pd.Series(b, index=list_std)
@@ -30,29 +60,13 @@ def predict():
       learn = learn.append(tmp_learn, ignore_index=True)
       result = result.append(tmp_result, ignore_index=True)
   
-  
-  train_x, test_x, train_y, test_y = train_test_split(learn, result, random_state=1)
-  lgb_train = lgb.Dataset(train_x, train_y)
-  lgb_eval = lgb.Dataset(test_x, test_y, reference=lgb_train)
-  parms = {
-    'task': 'train', #トレーニング用
-    'boosting': 'gbdt', #勾配ブースティング決定木
-    'objective': 'multiclass', #目的：多値分類
-    'num_class': 11 , #分類するクラス数
-    'metric': 'multi_error', #評価指標：正答率
-    'num_iterations': 1000, #1000回学習
-    'verbose': -1 #学習情報を非表示
-  }   
-  
-  model = lgb.train(parms,
-                 #訓練データ
-                 train_set=lgb_train,
-                 # 評価データ
-                 valid_sets=lgb_eval,
-                 early_stopping_rounds=100)
-  
-  y_pred = model.predict(test_x)
-# 予測確率を整数へ
-  y_pred = np.argmax(y_pred, axis=1) 
+  return learn, result
 
-  print(metrics.classification_report(test_y, y_pred))
+def one_hot_encode(y_data,y_label):
+    results = np.zeros((y_data.shape[0], len(y_label)))
+    for n in range(y_data.shape[0]):
+        result = y_data.iat[n,0].astype(str)
+        index = y_label.index(result)
+        results[n, index] = 1
+    return results
+  
