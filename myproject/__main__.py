@@ -3,10 +3,10 @@ from predicting import predict
 
 if __name__ == '__main__':
     #スクレピング
-    #scarpe()
+    scarpe()
     
     #予測
-    predict()
+    #predict()
       
 
     
