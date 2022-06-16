@@ -1,12 +1,9 @@
-from scraping import scarpe
+#大元
 from predicting import predict
 
-if __name__ == '__main__':
-    #スクレピング
-    scarpe()
-    
+if __name__ == '__main__':    
     #予測
-    #predict()
+    predict()
       
 
     
