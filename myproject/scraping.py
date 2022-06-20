@@ -4,11 +4,14 @@ import re
 import time
 import math
 import pickle
+
+from numpy import double
 #艇番 名前 全国2連率 全国勝率 当地勝率 当地2連率 モータ2連率 ボード2連率 級 展示タイム スタート展示 天気 着順
 
 def scarpe():
     week = '20220601'
-    list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位']
+    list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位', '']
+    list_result = ['3連単', '三連複', '二連単', '二連複', '拡張複', '単勝', '複勝']
     #とりあえず津のページの最新を表示
     print('start')
     for stage in range(12):
@@ -16,6 +19,7 @@ def scarpe():
         number = str(stage+1)
         number = number.zfill(2)
         count = 0
+        all_odds = []
         for a in range(100):
             url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-'+ number +'-' + week +'.html'
             f =  urllib.request.urlopen(url)
@@ -30,7 +34,7 @@ def scarpe():
                     week = re.sub(r"\D", "", link.text)
                     continue
                 #"https://race.kyotei.club/info/info-20220601-09-1.html"
-                #:https://race.kyotei.club/info/20220601-09-1.html"
+                #https://race.kyotei.club/info/20220601-09-1.html"
                 day = re.sub(r"\D", "", link.text)
                 #次のURLに飛ぶ準備
                 more_info_url_tmp.append("https://race.kyotei.club/info/info-" + day + "-" + number +"-")
@@ -153,29 +157,56 @@ def scarpe():
                         codeText = f.read().decode("utf-8")
                         soup = BeautifulSoup(codeText, 'html.parser')
                         time.sleep(1)
+
                         found = soup.find_all('span', class_='is-fs12')
                         for i, n in enumerate(found):
                             n = n.text.strip()
                             df[i].append(int(n))
+
                     
                         #前取ってあった着順を代入
                         for i, n in enumerate(arrive):
                             n = n.text.strip()
                             df[i].append(int(n))
-                    
+
+                        odds =[[0],
+                        [1],
+                        [2],
+                        [3],
+                        [4],
+                        [5],
+                        [6]
+                        ]
+                        odds_count = 0
+                        #オッズのデータ取得
+                        found = soup.find_all('span', class_='is-payout1')
+                        for i, n in enumerate(found):
+                            n = n.text.strip()
+                            if len(n) != 0:
+                                n = n.replace('¥', '')
+                                n = n.replace(',', '')
+                                if i == 1 or i==3 or i==5 or i==7 or i==11 or i==12 or i==14 or i==17:
+                                    odds[odds_count-1].append(int(n))
+                                elif i==8 or i==9 or i==15:
+                                    odds[odds_count].append(int(n))
+                                else:
+                                    odds[odds_count].append(int(n))
+                                    odds_count += 1
                     except Exception as e:
                         print(e)
                         print(data)
                     else:
                         all_data.append(df)
+                        all_odds.append(odds)
                         print(data)
                         count += 1
                     finally:
                         df = []
+                        odds = []
             print('-'*200)           
-        print(week)
-        print(stage)
-        print(count)
+        print('最終日:{}'.format(week))
+        print('場所:{}'.format(stage))
+        print('レースデータ件数:'.format(count))
         file_name = 'boat' + str(stage) + '.binaryfile'
         with open(file_name, 'wb') as web:
             pickle.dump(all_data, web)

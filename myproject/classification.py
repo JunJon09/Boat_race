@@ -18,11 +18,14 @@ def dataSplit(name):
     
   learn, result, count= split_train_test(data, list_std, result_std)
 
-  number = int(count * 0.7)
-  x_train = learn.iloc[:number,:]
-  x_test = learn.iloc[:2,:]
+  number = count/6
+  number = int(number * 0.7) * 6
+
+  x_train = learn.iloc[0:number]
+  x_test = learn.iloc[number:count]
+  y_train = result.iloc[0:number]
+  y_test = result.iloc[number:count]
   return x_train, x_test, y_train, y_test
-  
 
 #バイナリーデータから型を変更
 def split_train_test(data, list_std, result_std):
@@ -32,6 +35,9 @@ def split_train_test(data, list_std, result_std):
   for n in data:
     for i in n:
       a = i.pop(-1)
+      # if((a == 4 or a == 5) or a == 6):
+      if(a != 1):
+        a = 0
       b = i
       tmp_learn =  pd.Series(b, index=list_std)
       tmp_result = pd.Series(a, index=result_std)
@@ -40,5 +46,6 @@ def split_train_test(data, list_std, result_std):
       count += 1
   
   return learn, result, count
+  
   
   
