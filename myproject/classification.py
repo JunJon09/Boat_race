@@ -35,8 +35,8 @@ def split_train_test(data, list_std, result_std):
   for n in data:
     for i in n:
       a = i.pop(-1)
-      # if((a == 4 or a == 5) or a == 6):
-      if(a != 1):
+      if((a == 4 or a == 5) or a == 6):
+      #if(a != 1):
         a = 0
       b = i
       tmp_learn =  pd.Series(b, index=list_std)
