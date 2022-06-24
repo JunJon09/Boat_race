@@ -7,7 +7,7 @@ import time
 import math
 import pickle
 
-from numpy import double
+import timeout_decorator
 #艇番 名前 全国2連率 全国勝率 当地勝率 当地2連率 モータ2連率 ボード2連率 級 展示タイム スタート展示 天気 着順
 
 def scarpe():
@@ -25,7 +25,7 @@ def scarpe():
         for a in range(100):
             try:
                 url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-'+ number +'-' + week +'.html'
-                f =  urllib.request.urlopen(url)
+                f =  urllib.request.urlopen(url, timeout=3.5)
                 time.sleep(1)
                 #fをいつも書くhtmlに変換
                 codeText = f.read().decode("utf-8")
@@ -43,6 +43,7 @@ def scarpe():
                     more_info_url_tmp.append("https://race.kyotei.club/info/info-" + day + "-" + number +"-")
             except Exception as e:
                 print(e)
+                print(a)
                 print('これは上のエラー')
                 continue
             else:
@@ -61,7 +62,7 @@ def scarpe():
                             
                             
                             #ここで順位表を取れるとこまでできた。
-                            f =  urllib.request.urlopen(data)
+                            f =  urllib.request.urlopen(data, timeout=3.5)
                             codeText = f.read().decode("utf-8")
                             soup = BeautifulSoup(codeText, 'html.parser')
                             found = soup.find('div', class_='race_list_box_table')
@@ -107,7 +108,6 @@ def scarpe():
                             for i, n in enumerate(before_time):
                                 n = n.text.strip()
                                 df[i].append(float(n))
-                            time.sleep(1)
                             
                             #着順
                             #最後に代入する
@@ -119,7 +119,7 @@ def scarpe():
                             idx = link.find(target)
                             r = link[idx+10:idx+18]
                             data = "https://boatrace.jp/owpc/pc/race/beforeinfo?rno=" + str(x+1) + '&jcd=' + number +'&hd=' + r
-                            f =  urllib.request.urlopen(data)
+                            f =  urllib.request.urlopen(data, timeout=3.5)
                             codeText = f.read().decode("utf-8")
                             soup = BeautifulSoup(codeText, 'html.parser')
                             time.sleep(1)
@@ -160,7 +160,7 @@ def scarpe():
                             #https://boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=09&hd=20220427
                             #レーサ番号
                             data = "https://boatrace.jp/owpc/pc/race/raceresult?rno=" + str(x+1) + '&jcd='+ number + '&hd=' + r
-                            f =  urllib.request.urlopen(data)
+                            f =  urllib.request.urlopen(data, timeout=3.5)
                             codeText = f.read().decode("utf-8")
                             soup = BeautifulSoup(codeText, 'html.parser')
                             time.sleep(1)
