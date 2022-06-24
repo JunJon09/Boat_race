@@ -1,10 +1,16 @@
 #大元
 from predicting import predict
-
+from recovery_rate import recovery_rate
+import pickle
 if __name__ == '__main__':    
     #予測
-    predict()
-      
+    y_test, y_pred = predict('boat0.binaryfile')
+    #回収率計算
+    recovery_rate(y_test, y_pred, 'ODDS0.binaryfile')
+
+
+
+
 
     
    

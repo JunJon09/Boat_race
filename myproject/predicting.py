@@ -3,13 +3,14 @@
 
 from classification import dataSplit
 from algorithm import kreas_neuralnetwork
-from scikit_learn import sckit
+from scikit_learn import sckit_learn
 
-def predict():
+def predict(text):
   print('predictがStart!')
-  text = 'boat0.binaryfile'
   x_train, x_test, y_train, y_test = dataSplit(text)
-  sckit(x_train, x_test, y_train, y_test)
+  y_test, y_pred = sckit_learn(x_train, x_test, y_train, y_test)
+
+  return  y_test, y_pred
 
   
 
