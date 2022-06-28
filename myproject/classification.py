@@ -1,5 +1,6 @@
 #バイナリーファイルのものを持ってきて訓練データとテストデータにわける。
 
+from email import contentmanager
 from itertools import count
 import pandas as pd
 import pickle
@@ -36,10 +37,15 @@ def split_train_test(data, list_std, result_std):
     for i in n:
       a = i.pop(-1)
       b = i
-      tmp_learn =  pd.Series(b, index=list_std)
-      tmp_result = pd.Series(a, index=result_std)
-      learn = learn.append(tmp_learn, ignore_index=True)
-      result = result.append(tmp_result, ignore_index=True)
+      try:
+        tmp_learn =  pd.Series(b, index=list_std)
+        tmp_result = pd.Series(a, index=result_std)
+        learn = learn.append(tmp_learn, ignore_index=True)
+        result = result.append(tmp_result, ignore_index=True)
+      except Exception as e:
+        print(tmp_learn)
+        continue
+       
       count += 1
   
   return learn, result, count
