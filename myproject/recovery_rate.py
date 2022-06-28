@@ -72,8 +72,7 @@ def recovery_rate(y_test, y_pred, Odds_file):
     print('3連単の当たる確率 = {}'.format((count3/len(hit_result)) *100))
 
     left = np.array([i for i in range(0, len(hit_result))])
-    height = np.array(Trifecta_plt )
-    print(Trifecta_plt)
+    height = np.array(Trifecta_plt)
     plt.plot(left, height)
     plt.plot(left, height, linewidth=4, color="red")
     plt.show()
