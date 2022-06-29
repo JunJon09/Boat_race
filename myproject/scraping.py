@@ -21,7 +21,6 @@ def scarpe():
         number = str(stage+1)
         number = number.zfill(2)
         count = 0
-        all_odds = []
         for a in range(100):
             try:
                 url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-'+ number +'-' + week +'.html'
@@ -172,9 +171,20 @@ def scarpe():
 
                         
                             #前取ってあった着順を代入
-                            for i, n in enumerate(arrive):
+                            #1位〜3位の順位で同着だった場合データを取ら無い。
+                            rank = []
+                            for n in arrive:
                                 n = n.text.strip()
+                                rank.append(n)
+
+                            if rank.count("1") >= 2 or rank.count("2") >= 2 or rank.count("3") >= 2:
+                                raise ValueError("同着なのでリストの中には入れません")
+
+                            for i, n in enumerate(rank):
                                 df[i].append(int(n))
+                            
+                            
+                                
 
                             odds =[[0],
                             [1],
@@ -192,20 +202,28 @@ def scarpe():
                                 if len(n) != 0:
                                     n = n.replace('¥', '')
                                     n = n.replace(',', '')
-                                    if i == 1 or i==3 or i==5 or i==7 or i==11 or i==12 or i==14 or i==17:
-                                        odds[odds_count-1].append(int(n))
-                                    elif i==8 or i==9 or i==15:
-                                        odds[odds_count].append(int(n))
-                                    else:
+                                    if int(n) < 100:
+                                        raise ValueError("100円より低いものを確認しました。")
+                                    if i==0 or i==2 or i== 4 or i==6 or i==10 or i==13:
                                         odds[odds_count].append(int(n))
                                         odds_count += 1
+                                    elif i==8 or i==9 or i==15 or i==16:
+                                        odds[odds_count].append(int(n))
+
+                            #オッズとどこの何レース日にちを入れてる。
+                            #01-2-2021-09-01 1場所の2Rの2021年9月1日
+                            df.append(odds)
+                            race_day = data.replace('https://boatrace.jp/owpc/pc/race/raceresult?rno=', 'race=')
+                            race_day = race_day.replace('&jcd=', 'stage=')
+                            race_day = race_day.replace('&hd=', 'day=')
+                            df.append(race_day)
+
                         except Exception as e:
                             print(e)
                             print(data)
                         else:
                             all_data.append(df)
-                            all_odds.append(odds)
-                            print(data)
+                            print(df)
                             count += 1
                         finally:
                             df = []
@@ -214,13 +232,9 @@ def scarpe():
         print('最終日:{}'.format(week))
         print('場所:{}'.format(stage))
         print('レースデータ件数:'.format(count))
-        file_name = 'boat' + str(stage) + '.binaryfile'
-        file_nameODDS = 'ODDS' + str(stage) + '.binaryfile'
+        file_name = 'boat' + number + '.binaryfile'
         with open(file_name, 'wb') as web:
             pickle.dump(all_data, web)
-        
-        with open(file_nameODDS, 'wb') as web:
-            pickle.dump(all_odds, web)
     print("終了")
      
         

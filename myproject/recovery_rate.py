@@ -10,17 +10,13 @@ import matplotlib.pyplot as plt
 #oddsのファイルの形
 #[[[0,三連単], [1, 三連複], [2, 二連単], [3, 二連複], [4, 拡張複], [5, 単勝], [6, 複勝]]]
 #とりあえず3連単, 単勝
-def recovery_rate(y_test, y_pred, Odds_file):
+def recovery_rate(y_test, y_pred, y_odds):
     print('recovery_rateが実装した')
-    try:
-        with open(Odds_file, 'rb') as web:
-            Odds = pickle.load(web)
-    except Exception as e:
-        return e
+     e
     
     
     predict_rank, result_rank = fix_race_data(y_test, y_pred)
-    odds = Odds[-1*len(predict_rank):]
+    
     
     hit_result = race_check(predict_rank, result_rank)
     #回収率の計算
@@ -36,7 +32,7 @@ def recovery_rate(y_test, y_pred, Odds_file):
     Double_singl_plt = []
     one_win_recovery = []
     #[単勝,二連単,3連単]
-    for (hit, odd) in zip(hit_result, odds):
+    for (hit, odd) in zip(hit_result, y_oods):
         Trifecta_recovery_rate -= 100
         Double_single_recovery_rate -= 100
         one_win_recovery_rate -= 100
