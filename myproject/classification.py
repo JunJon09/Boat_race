@@ -19,7 +19,6 @@ def dataSplit(name):
     return e
     
   learn, result, odds, count = split_train_test(data, list_std, result_std)
-  print(data)
   number = count/6
   number = int(number * 0.7) * 6
 
@@ -27,7 +26,11 @@ def dataSplit(name):
   x_test = learn.iloc[number:count]
   y_train = result.iloc[0:number]
   y_test = result.iloc[number:count]
-  y_odds = odds.iloc[number:count]
+
+  number = count / 6
+  number = int(number * 0.7)
+  y_odds = odds[number:]
+  print(len(y_odds))
   return x_train, x_test, y_train, y_test, y_odds
 
 #バイナリーデータから型を変更
