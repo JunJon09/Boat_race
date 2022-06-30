@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 #[[[0,三連単], [1, 三連複], [2, 二連単], [3, 二連複], [4, 拡張複], [5, 単勝], [6, 複勝]]]
 #とりあえず3連単, 単勝
 def recovery_rate(y_test, y_pred, y_odds, x_train):
-    print('recovery_rateが実装した')    
+    print('recovery_rateが実装した')
     predict_rank, result_rank = fix_race_data(y_test, y_pred)
     hit_result = race_check(predict_rank, result_rank)
     #回収率の計算
@@ -33,15 +33,15 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
             if i == 5 and hit[0] == 1: #単勝
                 count1 += 1
                 one_win_recovery_rate += o[1]
-                print('A', o[1], odd[7])
+                #print('A', o[1], odd[7])
             elif i == 2 and hit[1] == 1: #二連単
                 Double_single_recovery_rate += o[1]
                 count2 += 1
-                print('B', o[1], odd[7])
+                #print('B', o[1], odd[7])
             elif i == 0 and hit[2] == 1: #3連単
                 Trifecta_recovery_rate += o[1]
                 count3 += 1
-                print('C', o[1], odd[7])
+                #print('C', o[1], odd[7])
         Trifecta_plt.append(Trifecta_recovery_rate)
         Double_singl_plt.append(Double_single_recovery_rate)
         one_win_recovery_plt.append(one_win_recovery_rate)
@@ -54,23 +54,23 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
     print('*' *100)
     print('結果発表！！')
 
-    print('単勝の回収率 = {}%'.format(one_win_recovery_rate/len(hit_result)/100 + 1))
-    print('二連単の回収率 = {}%'.format(Double_single_recovery_rate/len(hit_result)/100 + 1))
-    print('三連単の回収率 = {}%'.format(Trifecta_recovery_rate/len(hit_result)/100 + 1))
+    print('単勝の回収率 = {}%'.format((one_win_recovery_rate/len(hit_result)/100 + 1) *100))
+    print('二連単の回収率 = {}%'.format((Double_single_recovery_rate/len(hit_result)/100 + 1) *100))
+    print('三連単の回収率 = {}%'.format((Trifecta_recovery_rate/len(hit_result)/100 + 1)*100))
 
-    print('単勝の当たる確率 = {}'.format((count1/len(hit_result)) *100))
-    print('二連単の当たる確率 = {}'.format((count2/len(hit_result)) *100))
-    print('3連単の当たる確率 = {}'.format((count3/len(hit_result)) *100))
+    print('単勝の当たる確率 = {}%'.format((count1/len(hit_result)) *100))
+    print('二連単の当たる確率 = {}%'.format((count2/len(hit_result)) *100))
+    print('3連単の当たる確率 = {}%'.format((count3/len(hit_result)) *100))
 
     print('単勝の利益 = {}円'.format(one_win_recovery_rate))
     print('二連単の利益 = {}円'.format(Double_single_recovery_rate))
     print('三連単の利益 = {}円'.format(Trifecta_recovery_rate))
     print('学習レースデータ: {}件, テストレースデータ: {}件'.format(len(x_train)/6, len(y_test)/6))
     left = np.array([i for i in range(0, len(hit_result))])
-    height = np.array(one_win_recovery_plt)
+    height = np.array(Double_singl_plt)
     plt.plot(left, height)
     plt.plot(left, height, linewidth=4, color="red")
-    plt.title('1win', loc='center')
+    plt.title('2win', loc='center')
     plt.show()
 
 

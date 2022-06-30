@@ -4,11 +4,11 @@
 from classification import dataSplit
 from scikit_learn import sckit_learn
 
-def predict(text):
+def predict(text, s):
   print('predictがStart!')
   x_train, x_test, y_train, y_test, y_odds = dataSplit(text)
-  y_test, y_pred= sckit_learn(x_train, x_test, y_train, y_test)
-
+  y_test, y_pred= sckit_learn(x_train, x_test, y_train, y_test, s)
+  
   return  y_test, y_pred, y_odds, x_train
 
   
