@@ -12,7 +12,7 @@ import timeout_decorator
 
 def scarpe():
     week = '20220601'
-    list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位', '']
+    list_std = ['艇番', '全国2連率', '全国勝率', '当地2連率', '当地勝率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位']
     list_result = ['3連単', '三連複', '二連単', '二連複', '拡張複', '単勝', '複勝']
     #とりあえず津のページの最新を表示
     print('start')
@@ -113,7 +113,8 @@ def scarpe():
                             arrive = found[3].find_all('div')
                             
                             # 直前予想編   
-                            #https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=09&hd=20220601      
+                            #https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=09&hd=20220601  
+                            https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701    
                             target = 'info/'
                             idx = link.find(target)
                             r = link[idx+10:idx+18]
