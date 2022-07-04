@@ -12,12 +12,33 @@ def Get_race_info(stage, race):
     #https://www.boatrace.jp/owpc/pc/race/racelist?rno=1&jcd=01&hd=20220601
     try:
         stage = str(stage)
-        stage = stage.zfill(2)
         today = datetime.date.today()
         yyyymmdd = today.strftime('%Y%m%d')
-        yyyymmdd = '20220601'
-        #url = 'https://www.boatrace.jp/owpc/pc/race/racelist?rno='+ str(race) +'&jcd='+ str(stage) +'&hd=' + yyyymmdd
-        url = 'https://www.boatrace.jp/owpc/pc/race/racelist?rno=7&jcd=20&hd=20220701'
+        url = 'https://www.boatrace.jp/owpc/pc/race/racelist?rno='+ str(race) +'&jcd='+ str(stage.zfill(2)) +'&hd=' + yyyymmdd
+        #url = 'https://www.boatrace.jp/owpc/pc/race/racelist?rno=5&jcd=01&hd=20220703'
+        
+        #1Day
+        #3R!1
+        #6R1,2
+        #7R1,2
+        #9R1
+        #10R1
+        #11R1
+
+        #1470円
+        #560円
+
+        #2Day
+        #6 1, 140
+        #7 1, 2:150, 270
+        #11 1, 140
+        #12 1, 170
+
+        #600
+        # 270
+
+
+
         f =  urllib.request.urlopen(url, timeout=3.5)
         time.sleep(1)
         codeText = f.read().decode("utf-8")
@@ -98,8 +119,10 @@ def Get_race_info(stage, race):
 
         
         #https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701
-        #url = "https:/www./boatrace.jp/owpc/pc/race/beforeinfo?rno=" + str(race) + '&jcd=' + str(stage) +'&hd=' + yyyymmdd
-        url ='https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701'
+        #https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=3&jcd=01&hd=20220704
+        #https:/www./boatrace.jp/owpc/pc/race/beforeinfo?rno=3&jcd=01&hd=20220704
+        url = "https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=" + str(race) + '&jcd=' + str(stage.zfill(2)) +'&hd=' + yyyymmdd
+        #url ='https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701'
         f =  urllib.request.urlopen(url, timeout=3.5)
         codeText = f.read().decode("utf-8")
         soup = BeautifulSoup(codeText, 'html.parser')
@@ -147,11 +170,12 @@ def Get_race_info(stage, race):
 
         for i, number in  enumerate(player_number):
             df[i].append(number)
-        print(df)
+
+        print(df, url)
 
     except Exception as e:
         print(e)
-        exit(0)
+        
 
     return df
 

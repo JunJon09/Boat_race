@@ -5,7 +5,7 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
-
+import warnings
 def predict(df):
     list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号']
     result_std = ['順位']
@@ -15,7 +15,7 @@ def predict(df):
             data = pickle.load(web)
     except Exception as e:
         return e
-
+    warnings.simplefilter('ignore', FutureWarning)
     #データセット
     learn, result, odds, count = split_train_test(data, list_std, result_std)
     x_train = learn
@@ -35,7 +35,7 @@ def predict(df):
             if n == m:
                 rank[j] = i + 1
 
-    print(rank)
+    
 
     
     return rank
@@ -45,7 +45,6 @@ def predict(df):
 
 #バイナリーデータから型を変更
 def split_train_test(data, list_std, result_std):
-  
     learn = pd.DataFrame(index=[])
     result = pd.DataFrame(index=[])
     count = 0
@@ -76,8 +75,6 @@ def split_train_test(data, list_std, result_std):
                 result = result.append(tmp_result, ignore_index=True)
                 count += 1
 
-    print(er_tmp)
-    print(count, len(data)*6)
 
     return learn, result, odds, count
 
