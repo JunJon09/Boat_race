@@ -36,9 +36,22 @@ def predict(df):
                 rank[j] = i + 1
 
     
+    r_3 = []
+    for i, number in enumerate(rank):
+        if number == 1:
+            r_3.append(i+1)
+
+    for i, number in enumerate(rank):
+        if number == 2:
+            r_3.append(i+1)
+    
+    for i, number in enumerate(rank):
+        if number == 3:
+            r_3.append(i+1)
+    print(r_3)
 
     
-    return rank
+    return r_3
 
 
 

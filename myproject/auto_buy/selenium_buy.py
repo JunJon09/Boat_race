@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import pickle
-def selenium_buy(result, stage, race):
+def selenium_buy(rank, stage, race):
     driver = webdriver.Chrome()  #WEBブラウザの起動
 
     driver.get('https://ib.mbrace.or.jp/') 
@@ -39,20 +39,6 @@ def selenium_buy(result, stage, race):
     race.click()
 
 
-    rank = []
-    print(result)
-    for i, number in enumerate(result):
-        if number == 1:
-            rank.append(i+1)
-
-    for i, number in enumerate(result):
-        if number == 2:
-            rank.append(i+1)
-    
-    for i, number in enumerate(result):
-        if number == 3:
-            rank.append(i+1)
-    print(rank)
     #二連単
     two_win = driver.find_element("id", "betkati3")
     two_win.click()
@@ -85,7 +71,6 @@ def selenium_buy(result, stage, race):
     Bet_append.click()
 
     voting = driver.find_elements(By.CLASS_NAME, "btnSubmit ")
-    print(voting)
     #
     #driver.find_element_by_xpath('//*[@id="betList"]/div[3]/div[3]')
     voting[0].click()

@@ -5,7 +5,7 @@ from itertools import count
 import pandas as pd
 import pickle
 from sklearn.model_selection import train_test_split
-
+import warnings
 
 def dataSplit(name):
   print('dataSplitがStart!')
@@ -17,6 +17,7 @@ def dataSplit(name):
       data = pickle.load(web)
   except Exception as e:
     return e
+  warnings.simplefilter('ignore', FutureWarning)
   learn, result, odds, count = split_train_test(data, list_std, result_std)
   number = count/6
   number = int(number * 0.7) * 6
