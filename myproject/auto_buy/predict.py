@@ -1,5 +1,6 @@
 #データをもとに予測する。
 
+from tkinter import W
 import pandas as pd
 import pickle
 from sklearn.ensemble import RandomForestClassifier
@@ -13,6 +14,7 @@ def predict(df):
     try:
         with open('../../binaryfile/boat01.binaryfile', 'rb') as web:
             data = pickle.load(web)
+        web.close
     except Exception as e:
         return e
     warnings.simplefilter('ignore', FutureWarning)
@@ -49,6 +51,10 @@ def predict(df):
         if number == 3:
             r_3.append(i+1)
     print(r_3)
+
+    #3連単とか何を買うか決めている。
+    #0,,
+    r_3.append([2,5])
 
     
     return r_3

@@ -114,7 +114,7 @@ def scarpe():
                             
                             # 直前予想編   
                             #https://boatrace.jp/owpc/pc/race/beforeinfo?rno=1&jcd=09&hd=20220601  
-                            https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701    
+                            #https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=7&jcd=20&hd=20220701    
                             target = 'info/'
                             idx = link.find(target)
                             r = link[idx+10:idx+18]
@@ -236,6 +236,7 @@ def scarpe():
         file_name = 'boat' + number + '.binaryfile'
         with open(file_name, 'wb') as web:
             pickle.dump(all_data, web)
+        web.close
     print("終了")
      
         

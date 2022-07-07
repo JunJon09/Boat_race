@@ -143,7 +143,71 @@ def race_check(predict_rank, result_rank):
 
     return hit_result         
 
-            
+def ranck_check(predict_rank, real_rank):
+    #1ならあたり['3連単', '三連複', '二連単', '二連複', '拡張(これは実装しない)', '単勝', '複勝']
+    #[2,1,3,[1,2], 'stage', 'race']
+    #3連単
+    p_rank = []
+    for i, rank in enumerate(predict_rank):
+        if i <=3:
+            p_rank.append(rank)
+    result = []
+    if (predict_rank[0] == real_rank[0]) and (predict_rank[1] == real_rank[1]) and (predict_rank[2] == real_rank[2]):
+        result.append(1)
+    else:
+        result.append(0)
+    
+    #三連複
+    count = 0
+    for p in p_rank:
+        for r in real_rank:
+            if p == r:
+                count += 1
+    
+    if count == 3:
+        result.append(1)
+    else:
+        result.append(0)
+    
+    #二連単
+    if (predict_rank[0] == real_rank[0]) and (predict_rank[1] == real_rank[1]):
+        result.append(1)
+    else:
+        result.append(0)
+    #二連複
+    count = 0
+    for i,p in enumerate(p_rank):
+        for j,r in enumerate(real_rank):
+           if i<=1 and j<=1:
+            if p == r:
+                count += 1
+    if count == 2:
+        result.append(1)
+    else:
+        result.append(0)
+
+    #拡張
+    result.append(0)
+
+    #単勝
+    if predict_rank[0] == real_rank [0]:
+        result.append(1)
+    else:
+        result.append(0)
+    
+    #複勝
+    count = 0
+    for i, r in enumerate(real_rank):
+        if i<=1:
+            if r == predict_rank[0]:
+                count += 1
+    
+    if count == 1:
+        result.append(1)
+    else:
+        result.append(1)
+    
+    return result          
 
 
 

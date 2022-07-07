@@ -9,7 +9,10 @@ def buy_notification(race, stage, memory_race):
     if memory_race[-1][0] == '-':
         message += 'エラーが起きたので予測できませんでした。\n\n'
     else:
-        message += "1着" +  str(memory_race[-1][0]) + "番 " + "2着" + str(memory_race[-1][1]) + "番 " + "3着" + str(memory_race[-1][2])+ "番\n\n"
+        message += "1着" +  str(memory_race[-1][0]) + "番 " + "2着" + str(memory_race[-1][1]) + "番 " + "3着" + str(memory_race[-1][2])+ "番\n"
+
+    if len(memory_race[-1]) == 5:
+        message += "購入プログラムでエラーが発生したので購入してません。\n"
 
     if len(memory_race) != 1:
         message += "場所:" + str(stage) + ", " + str(race-1) +"レースの結果\n"
