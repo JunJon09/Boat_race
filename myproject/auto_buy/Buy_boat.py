@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt
 
 
 #今日何を買ったのか記録
-#memory_race = []
-memory_race = [[1,2,3,[0], 1, 1], [4,3,5,[6], 1, 12]]
-stage_race = [1]
+memory_race = []
+#memory_race = [[1,2,3,[0], 1, 1], [4,3,5,[6], 1, 12]]
+stage_race = []
 #レースデータを調べて購入
 def Buy_boat(stage):
     print('舟券を買うためのプログラムが実行されました。')
@@ -31,7 +31,7 @@ def Buy_boat(stage):
         df = Get_race_info(stage, race)
 
         #予測をする。
-        rank = predict(df)
+        rank = predict(df, stage)
 
         #購入
         selenium_buy(rank, stage, race)
@@ -87,12 +87,13 @@ def Input_schedule(race_time):
     #今日のレースを確認する。
     # global memory_race
     global stage_race
-    #memory_race = []
+    memory_race = []
     stage_race = [0 for i in range(25)]
     for data in race_time:
+        print(data)
         for text in data[1]:
-            schedule.every().day.at(text).do(Buy_boat, stage=str(data[0]))
-    schedule.every().days.at("13:30").do(day_notification)
+            schedule.every().day.at(text).do(Buy_boat, stage=data[0])
+    schedule.every().days.at("23:00").do(day_notification)
     while True:
         schedule.run_pending()
         time.sleep(1)

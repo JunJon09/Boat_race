@@ -7,10 +7,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
 import warnings
-def predict(df):
+def predict(df, stage):
     list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号']
     result_std = ['順位']
     odds_std = ['オッズ']
+    stage = str(stage)
+    text = '../../binaryfile/boat' + stage.zfill(2) +'.binaryfile'
     try:
         with open('../../binaryfile/boat01.binaryfile', 'rb') as web:
             data = pickle.load(web)
@@ -32,11 +34,13 @@ def predict(df):
 
     print(y_pred)
     rank = [0, 0, 0, 0, 0, 0]
-    for i, n in enumerate(sorted(y_pred)):
+    #[2.1, 1.9, 1.3, 4.1, 3.0, 5.0]
+    for i, n in enumerate(sorted(y_pred)): #低い順番に並べ直す　
         for j, m in enumerate(y_pred):
             if n == m:
-                rank[j] = i + 1
+                rank[j] = i + 1 
 
+    #[3, 2, 1, 5, 4, 6]
     
     r_3 = []
     for i, number in enumerate(rank):

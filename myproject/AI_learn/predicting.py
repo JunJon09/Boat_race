@@ -7,6 +7,7 @@ from scikit_learn import sckit_learn
 def predict(text):
   print('predictがStart!')
   x_train, x_test, y_train, y_test, y_odds = dataSplit(text)
+  print('aaaa')
   y_test, y_pred= sckit_learn(x_train, x_test, y_train, y_test)
   
   return  y_test, y_pred, y_odds, x_train

@@ -6,24 +6,27 @@ import re
 import time
 import math
 import pickle
-
+import datetime
 import timeout_decorator
+import traceback
 #艇番 名前 全国2連率 全国勝率 当地勝率 当地2連率 モータ2連率 ボード2連率 級 展示タイム スタート展示 天気 着順
 
 def scarpe():
-    week = '20220601'
+    today = datetime.date.today()
+    yyyymmdd = today.strftime('%Y%m%d')
+    week = str(yyyymmdd)
     list_std = ['艇番', '全国2連率', '全国勝率', '当地2連率', '当地勝率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号','順位']
     list_result = ['3連単', '三連複', '二連単', '二連複', '拡張複', '単勝', '複勝']
     #とりあえず津のページの最新を表示
     print('start')
-    for stage in range(12):
+    for stage in range(24):
         all_data = []
         number = str(stage+1)
         number = number.zfill(2)
         count = 0
         for a in range(100):
             try:
-                url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-'+ number +'-' + week +'.html'
+                url = 'https://kyotei.sakura.ne.jp/kako_kaijyo-'+ number +'-' + str(20180519) +'.html'
                 f =  urllib.request.urlopen(url, timeout=3.5)
                 time.sleep(1)
                 #fをいつも書くhtmlに変換
@@ -48,6 +51,7 @@ def scarpe():
             else:
                 #12レースあるから
                 for link in more_info_url_tmp:
+                    twelve_data = []
                     for x in range(12):
                         try:
                             df =[  [1],
@@ -72,7 +76,7 @@ def scarpe():
                             #全国の2連率と全国の勝率
                             natonal_two = found[21].find_all('div')
                             df = two_world(natonal_two, df)
-                            
+
                             #当地の2連率と勝率
                             locational_two = found[22].find_all('div') 
                             df = two_world(locational_two, df)
@@ -218,17 +222,22 @@ def scarpe():
                             race_day = race_day.replace('&jcd=', 'stage=')
                             race_day = race_day.replace('&hd=', 'day=')
                             df.append(race_day)
-
                         except Exception as e:
                             print(e)
                             print(data)
+                            print(traceback.format_exc())
                         else:
-                            all_data.append(df)
                             print(df)
+                            twelve_data.append(df)
+                            
                             count += 1
                         finally:
                             df = []
                             odds = []
+                    
+                    all_data.insert(0, twelve_data)
+                    print(all_data)
+                    print('*'*100)
             print('-'*200)           
         print('最終日:{}'.format(week))
         print('場所:{}'.format(stage))
@@ -238,7 +247,7 @@ def scarpe():
             pickle.dump(all_data, web)
         web.close
     print("終了")
-     
+    
         
 #偏差値
 def  deviation_value(scores, df):
@@ -248,10 +257,14 @@ def  deviation_value(scores, df):
     for score in scores:
         zure = round((score - average)**2, 1)
         zure_sum += zure
-    variance = zure_sum/len(scores)
-    standard_deviation = math.sqrt(variance)
-    for score in scores:
-        hensachi.append(round(((score-average)/standard_deviation)*10 + 50, 1))
+    variance = zure_sum/len(scores)#分散
+    standard_deviation = math.sqrt(variance) #標準偏差
+    if standard_deviation == 0:
+        for i in range(6):
+            df[i].append(50)
+    else:
+        for score in scores:
+            hensachi.append(round(((score-average)/standard_deviation)*10 + 50, 1))
     for i, n in enumerate(hensachi):
         df[i].append(n)
     return df

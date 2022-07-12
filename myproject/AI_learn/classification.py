@@ -18,6 +18,7 @@ def dataSplit(name):
   except Exception as e:
     return e
   warnings.simplefilter('ignore', FutureWarning)
+  #print(data)
   learn, result, odds, count = split_train_test(data, list_std, result_std)
   number = count/6
   number = int(number * 0.7) * 6
@@ -26,11 +27,13 @@ def dataSplit(name):
   x_test = learn.iloc[number:count]
   y_train = result.iloc[0:number]
   y_test = result.iloc[number:count]
-
   number = count / 6
   number = int(number * 0.7)
   y_odds = odds[number:]
   print(len(y_odds))
+  # print(y_odds)
+  # print('\n' *100)
+  # print(odds)
   return x_train, x_test, y_train, y_test, y_odds
 
 #バイナリーデータから型を変更
@@ -42,28 +45,33 @@ def split_train_test(data, list_std, result_std):
   er = 0
   er_tmp = []
   for n in data:
-    for i, one in enumerate(n):
-      try:
-        if i == 6:
-          one.append(n[7])
-          odds.append(one)
-        elif i <= 5:
-          a = one.pop(-1)
-          b = one
+    for tmp in n:
+      for i, one in enumerate(tmp):
+        try:
+          
+          if i == 6:
+            one.append(tmp[7])
+            odds.append(one)
+          elif i <= 5:
+            a = one.pop(-1)
+            b = one
+            tmp_learn =  pd.Series(b, index=list_std)
+            tmp_result = pd.Series(a, index=result_std)
+            learn = learn.append(tmp_learn, ignore_index=True)
+            result = result.append(tmp_result, ignore_index=True)
+            count += 1
+        except IndexError as e:
+          er_tmp.append(e)
+          print(tmp[i], tmp[i-1])
+          pass
+        except Exception as e:
+          #er_tmp.append(e)
+          b.insert(9, 1.0)
           tmp_learn =  pd.Series(b, index=list_std)
           tmp_result = pd.Series(a, index=result_std)
           learn = learn.append(tmp_learn, ignore_index=True)
           result = result.append(tmp_result, ignore_index=True)
           count += 1
-          
-      except Exception as e:
-        er_tmp.append(e)
-        b.insert(9, 1.0)
-        tmp_learn =  pd.Series(b, index=list_std)
-        tmp_result = pd.Series(a, index=result_std)
-        learn = learn.append(tmp_learn, ignore_index=True)
-        result = result.append(tmp_result, ignore_index=True)
-        count += 1
 
   print(er_tmp)
   print(count, len(data)*6)

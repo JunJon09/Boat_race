@@ -16,7 +16,7 @@ def day_check(memory_race):
             stage = str(race[4])
             R = str(race[5])
             try:
-                url = "https://www.boatrace.jp/owpc/pc/race/raceresult?rno=" + R + "&jcd=" + str(stage.zfill(2)) + "&hd=" + "20220706"
+                url = "https://www.boatrace.jp/owpc/pc/race/raceresult?rno=" + R + "&jcd=" + str(stage.zfill(2)) + "&hd=" + yyyymmdd
                 f =  urllib.request.urlopen(url, timeout=3.5)
                 codeText = f.read().decode("utf-8")
                 soup = BeautifulSoup(codeText, 'html.parser')
