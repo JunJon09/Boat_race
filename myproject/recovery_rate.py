@@ -67,10 +67,10 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
     print('三連単の利益 = {}円'.format(Trifecta_recovery_rate))
     print('学習レースデータ: {}件, テストレースデータ: {}件'.format(len(x_train)/6, len(y_test)/6))
     left = np.array([i for i in range(0, len(hit_result))])
-    height = np.array(Double_singl_plt)
+    height = np.array(Trifecta_plt)
     plt.plot(left, height)
     plt.plot(left, height, linewidth=4, color="red")
-    plt.title('2win', loc='center')
+    plt.title('3win', loc='center')
     plt.show()
 
 
