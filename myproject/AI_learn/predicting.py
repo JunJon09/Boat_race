@@ -5,39 +5,29 @@ from classification import dataSplit
 from scikit_learn import sckit_learn
 import pickle
 
-def predict(text):
+def predict():
   print('predictがStart!')
-  # x_train, x_test, y_train, y_test, y_odds = dataSplit(text)
-  # with open('../../binaryfile/x_train.binaryfile', 'wb') as web:
-  #           pickle.dump(x_train, web)
-  # web.close
-  # with open('../../binaryfile/y_train.binaryfile', 'wb') as web:
-  #           pickle.dump(y_train, web)
-  # web.close
-  # with open('../../binaryfile/x_test.binaryfile', 'wb') as web:
-  #           pickle.dump(x_test, web)
-  # web.close
-  # with open('../../binaryfile/y_test.binaryfile', 'wb') as web:
-  #           pickle.dump(y_test, web)
-  # web.close
-  # with open('../../binaryfile/odds.binaryfile', 'wb') as web:
-  #           pickle.dump(y_odds, web)
-  # web.close
-
+  text = 1
+  text = str(text)
+  x_train_text = "../../binaryfile/x_train_" + text.zfill(2) + ".binaryfile"
+  y_train_text = "../../binaryfile/y_train_" + text.zfill(2) + ".binaryfile"
+  x_test_text = "../../binaryfile/x_test_" + text.zfill(2) + ".binaryfile"
+  y_test_text = "../../binaryfile/y_test_" + text.zfill(2) + ".binaryfile"
+  odds_text = "../../binaryfile/odds_" + text.zfill(2) + ".binaryfile"
   
-  with open('../../binaryfile/x_train.binaryfile', 'rb') as web:
+  with open(x_train_text, 'rb') as web:
     x_train = pickle.load(web)
   web.close
-  with open('../../binaryfile/x_test.binaryfile', 'rb') as web:
+  with open(x_test_text, 'rb') as web:
     x_test = pickle.load(web)
   web.close
-  with open('../../binaryfile/y_train.binaryfile', 'rb') as web:
+  with open(y_train_text, 'rb') as web:
     y_train = pickle.load(web)
   web.close
-  with open('../../binaryfile/y_test.binaryfile', 'rb') as web:
+  with open(y_test_text, 'rb') as web:
     y_test = pickle.load(web)
   web.close
-  with open('../../binaryfile/odds.binaryfile', 'rb') as web:
+  with open(odds_text, 'rb') as web:
     y_odds = pickle.load(web)
   web.close
 
