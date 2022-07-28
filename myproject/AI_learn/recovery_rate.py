@@ -147,11 +147,11 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
                     
             elif i == 6:
                 if len(o) >=3:
-                    if o[1] <=210 or o[2] <= 210:
+                    if o[1] <=200 or o[2] <= 200:
                         placing_bets_recovery_rate += 100
                         continue
                 else:
-                    if o[1] <= 210:
+                    if o[1] <= 200:
                         placing_bets_recovery_rate += 100
                         continue
                 

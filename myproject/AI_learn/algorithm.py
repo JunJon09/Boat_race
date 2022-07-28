@@ -40,7 +40,7 @@ def algorithm(x_train, x_test, y_train, y_test):
                   # 'metric': 'ndcg',   # for lambdarank
                   'ndcg_eval_at': [1,2,3,4,5,6],  # 3連単を予測したい
                   'max_position': 6,  # 競艇は6位までしかない
-                  'learning_rate': 1.61, 
+                  'learning_rate': 1.88, 
                   # 'min_data': 1,
                   # 'min_data_in_bin': 1,
       }

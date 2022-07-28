@@ -6,7 +6,7 @@ import pickle
 
 def predict():
   print('predictがStart!')
-  text = 23
+  text = 3
   text = str(text)
   x_train_text = "../../binaryfile/x_train_" + text.zfill(2) + ".binaryfile"
   y_train_text = "../../binaryfile/y_train_" + text.zfill(2) + ".binaryfile"
