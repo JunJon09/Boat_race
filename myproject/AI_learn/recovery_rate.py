@@ -13,6 +13,16 @@ from urllib3 import Retry
 #とりあえず3連単, 単勝
 def recovery_rate(y_test, y_pred, y_odds, x_train):
     print('recovery_rateが実装した')
+    odds_tmp = y_odds
+    for i, odd in enumerate(odds_tmp):
+        for j, o in enumerate(odd):
+            if j == 5 and len(o) >= 3:
+                tmp = y_odds[i][j-1].pop(-1)
+                a = y_odds[i][j].pop(1)
+                b = y_odds[i][j].pop(1)
+                y_odds[i][j].append(tmp)
+                y_odds[i][j+1].append(a)
+                y_odds[i][j+1].append(b)
     predict_rank, result_rank = fix_race_data(y_test, y_pred)
     predict_rank, result_rank = soted_rank(predict_rank, result_rank)
     hit_resul = ranck_check(predict_rank, result_rank)
@@ -116,7 +126,7 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
                     Extended_duplication_rate += o[3]
                     count7 += 1
             elif i == 5:#単勝     
-                if o[1] <= 290:
+                if o[1] <= 280:
                     one_win_recovery_rate += 100
                 else:
                     if hit[5] == 1:       
@@ -137,11 +147,11 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
                     
             elif i == 6:
                 if len(o) >=3:
-                    if o[1] <=170 or o[2] <= 170:
+                    if o[1] <=210 or o[2] <= 210:
                         placing_bets_recovery_rate += 100
                         continue
                 else:
-                    if o[1] <= 170:
+                    if o[1] <= 210:
                         placing_bets_recovery_rate += 100
                         continue
                 
@@ -163,6 +173,9 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
                         hit_list[5][5] += 1
                     
                 if hit[6] == 2:
+                    if len(o) == 2:
+                        placing_bets_recovery_rate += 100
+                        continue
                     count6 += 1
                     placing_bets_recovery_rate += o[2]
                     if o[1] < 200:
@@ -243,7 +256,9 @@ def fix_race_data(y_test, y_pred):
 
     predict_rank = []
     for one_race in one_race_data:
+        #ここでもし毎回買い目を1,2,3にする。
         tmp = rank_sort(sorted(one_race), one_race)
+        #tmp = [1, 2, 3, 4, 5, 6]
         predict_rank.append(tmp)
 
     one_reace_results = []
@@ -265,71 +280,7 @@ def rank_sort(up_sort, normal_sort):
             if n == m:
                 rank[j] = i + 1
     
-    return rank
-
-#予測が当たってるか
-def race_check(predict_rank, result_rank):
-    hit_result = []
-    Trifecta_flag = 0 #三連単
-    Triple_flag = 0 #三連複
-    Double_single_flag = 0 #二連単
-    Double_double_flag = 0 #二連複
-    one_win_flag = 0 #単勝
-    Double_win = 0 #複勝
-    ream_count = 0 #連単カウント
-    hit_tmp = []
-    for (predict, result) in zip(predict_rank, result_rank):
-        for i, (p, r) in enumerate(zip(predict, result)):
-            if i<= 2 and p == r:
-                ream_count += 1
-            
-        if ream_count == 0: #[単勝,二連単,3連単]
-            hit_tmp = [0, 0, 0]
-        elif ream_count == 1:
-            hit_tmp = [1, 0, 0]
-        elif ream_count == 2:
-            hit_tmp = [1, 1, 0]
-        elif ream_count == 3:
-            hit_tmp = [1, 1, 1]
-
-        hit_result.append(hit_tmp)
-        hit_tmp = []
-        ream_count = 0
-
-    return hit_result         
-
-
-#予測が当たってるか
-def race_check(predict_rank, result_rank):
-    hit_result = []
-    Trifecta_flag = 0 #三連単
-    Triple_flag = 0 #三連複
-    Double_single_flag = 0 #二連単
-    Double_double_flag = 0 #二連複
-    one_win_flag = 0 #単勝
-    Double_win = 0 #複勝
-    ream_count = 0 #連単カウント
-    hit_tmp = []
-    for (predict, result) in zip(predict_rank, result_rank):
-        for i, (p, r) in enumerate(zip(predict, result)):
-            if i<= 2 and p == r:
-                ream_count += 1
-            
-        if ream_count == 0: #[単勝,二連単,3連単]
-            hit_tmp = [0, 0, 0]
-        elif ream_count == 1:
-            hit_tmp = [1, 0, 0]
-        elif ream_count == 2:
-            hit_tmp = [1, 1, 0]
-        elif ream_count == 3:
-            hit_tmp = [1, 1, 1]
-
-        hit_result.append(hit_tmp)
-        hit_tmp = []
-        ream_count = 0
-
-    return hit_result         
-
+    return rank         
 
 def ranck_check(predict, real):
     #1ならあたり['3連単', '三連複', '二連単', '二連複', '拡張(これは実装しない)', '単勝', '複勝']

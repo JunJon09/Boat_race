@@ -1,13 +1,12 @@
 #レースの予測する
 #艇番 名前 全国2連率 全国勝率 当地勝率 当地2連率 モータ2連率 ボード2連率 級 展示タイム スタート展示 天気 着順
 
-from classification import dataSplit
-from scikit_learn import sckit_learn
+from algorithm import algorithm
 import pickle
 
 def predict():
   print('predictがStart!')
-  text = 1
+  text = 23
   text = str(text)
   x_train_text = "../../binaryfile/x_train_" + text.zfill(2) + ".binaryfile"
   y_train_text = "../../binaryfile/y_train_" + text.zfill(2) + ".binaryfile"
@@ -32,7 +31,7 @@ def predict():
   web.close
 
 
-  y_test, y_pred= sckit_learn(x_train, x_test, y_train, y_test)
+  y_test, y_pred= algorithm(x_train, x_test, y_train, y_test)
   
   return  y_test, y_pred, y_odds, x_train
 

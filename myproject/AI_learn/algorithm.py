@@ -1,28 +1,56 @@
-#色々なニューラルネットワークを試す場所
+#ランダムフォレストを使って学習
 
-#from keras.models import Sequential
-#from keras.layers import Dense, Dropout
-#from tensorflow.keras.callbacks import EarlyStopping
+from pprint import pformat
+from pyexpat.errors import XML_ERROR_TAG_MISMATCH
+from tkinter.tix import Y_REGION
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LinearRegression
+import pandas as pd
+import lightgbm as lgb
+import numpy as np
+import matplotlib.pyplot as plt
+import lightgbm as lgb
+import time
 
-#TensorFlowまたはCNTK，Theano上で実行可能な高水準のニューラルネットワークライブラリ
-def kreas_neuralnetwork(x_train, x_test, y_train, y_test):
-  print('kreas_neuralnetworkがStrat!')
-  print(x_train)
-  # model = Sequential()
-  # model.add(Dense(132, input_shape=(x_train.shape[1],), activation='relu'))
-  # model.add(Dropout(0.36))
-  # model.add(Dense(200, activation='relu'))
-  # model.add(Dropout(0.49))
-  # model.add(Dense(200, activation='relu'))
-  # model.add(Dropout(0.49))
-  # model.add(Dense(y_train.shape[1], activation='softmax'))
-  # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-  
-  # early_stopping = EarlyStopping(patience=10, verbose=1)
-  # model.fit(x_train, y_train, batch_size=50, verbose=0, epochs=100, validation_split=0.1, callbacks=[early_stopping])
-  
-  # score = model.evaluate(x_test, y_test, verbose=1)
-  # print("Test loss:",score[0])
-  # print("Test accuracy:",score[1])
-  # print('Finish')
-  # print(score)
+
+
+from pandas import DataFrame
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+def algorithm(x_train, x_test, y_train, y_test):
+    #分類
+    # clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
+    # clf.fit(x_train, y_train.values.ravel())
+    # y_pred = clf.predict(x_test)
+    #回帰
+      # reg_lr = LinearRegression()
+      # reg_lr.fit(x_train, y_train.values.ravel())
+      # y_pred_1 = reg_lr.predict(x_test)
+    # #標準化偏回帰係数を求めてる
+    # coef_df = pd.DataFrame(reg_lr.coef_,x_train.columns)
+    # # print(coef_df)
+      
+    
+      lgb_train = lgb.Dataset(x_train, y_train)
+      lgb_test = lgb.Dataset(x_test, y_test, reference=lgb_train)
+      params = {'task': 'train',
+                  'boosting_type': 'gbdt',
+                  # 'objective': 'lambdarank', #←ここでランキング学習と指定！
+                  # 'metric': 'ndcg',   # for lambdarank
+                  'ndcg_eval_at': [1,2,3,4,5,6],  # 3連単を予測したい
+                  'max_position': 6,  # 競艇は6位までしかない
+                  'learning_rate': 1.61, 
+                  # 'min_data': 1,
+                  # 'min_data_in_bin': 1,
+      }
+      lgb_results = {} 
+      gbm = lgb.train(params, lgb_train)
+      test_predicted = gbm.predict(x_test)
+      print(test_predicted)
+      # y_pred = model.predict(x_test)
+    # print(y_pred_1)
+   #
+    
+    
+      return y_test, test_predicted
