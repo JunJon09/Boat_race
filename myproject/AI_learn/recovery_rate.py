@@ -49,6 +49,7 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
     one_win_recovery_plt= []
     placing_bets_plt = []
     Extended_duplication_plt = []
+    money = 100000
     #[三連単,三連複,二連単,二連複,拡張,単勝,複勝,]
     for (hit, odd) in zip(hit_resul, y_odds):
         Trifecta_recovery_rate -= 100 
@@ -157,41 +158,17 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
                 
                     
                 if  hit[6] == 1:#複勝
-                    count6 += 1
                     placing_bets_recovery_rate += o[1]
-                    if o[1] < 200:
-                        hit_list[5][0] += 1
-                    elif o[1] < 400:
-                        hit_list[5][1] += 1
-                    elif o[1] < 600:
-                        hit_list[5][2] += 1
-                    elif o[1] < 1000:
-                        hit_list[5][3] += 1
-                    else:
-                        hit_list[5][4] += 1
-                    if (o[1] <=110):
-                        hit_list[5][5] += 1
-                    
+                    count6 += 1
                 if hit[6] == 2:
                     if len(o) == 2:
                         placing_bets_recovery_rate += 100
                         continue
-                    count6 += 1
                     placing_bets_recovery_rate += o[2]
-                    if o[1] < 200:
-                        hit_list[5][0] += 1
-                    elif o[1] < 400:
-                        hit_list[5][1] += 1
-                    elif o[1] < 600:
-                        hit_list[5][2] += 1
-                    elif o[1] < 1000:
-                        hit_list[5][3] += 1
-                    else:
-                        hit_list[5][4] += 1
-                    if (o[2] < 120):
-                        hit_list[5][5] += 1
+                    count6 += 1
                 
-            
+        if money > placing_bets_recovery_rate:
+            money = placing_bets_recovery_rate
         Trifecta_plt.append(Trifecta_recovery_rate)
         triplet_plt.append(triplet_recovery_rate)
         Double_singl_plt.append(Double_single_recovery_rate)
@@ -231,6 +208,7 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
     print('単勝の利益 = {}円'.format(one_win_recovery_rate))
     print('複勝の利益 = {}円'.format(placing_bets_recovery_rate))
     print('拡幅の利益 = {}円'.format(Extended_duplication_rate))
+    print("ドローダウン: {}円".format(money))
     print('*' *100)
     print('学習レースデータ: {}件, テストレースデータ: {}件'.format(len(x_train)/6, len(y_test)/6))
     print(hit_list)
@@ -238,8 +216,8 @@ def recovery_rate(y_test, y_pred, y_odds, x_train):
     height = np.array(placing_bets_plt)
     plt.plot(left, height)
     plt.plot(left, height, linewidth=4, color="red")
-    plt.title('3win', loc='center')
-    #plt.show()
+    plt.title('1sub', loc='center')
+    plt.show()
 
 
     
