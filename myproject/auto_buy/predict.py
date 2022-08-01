@@ -1,110 +1,112 @@
 #データをもとに予測する。
-
-from tkinter import W
 import pandas as pd
 import pickle
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LinearRegression
-import warnings
+import lightgbm as lgb
+
 def predict(df, stage):
     list_std = ['艇番', '全国2連率', '全国勝率', '当地勝率', '当地2連率', 'モータ2連率', 'ボード2連率', '級','展示タイム', 'スタート展示', '天気', 'レーサ番号']
     result_std = ['順位']
     odds_std = ['オッズ']
     stage = str(stage)
-    text = '../../binaryfile/boat' + stage.zfill(2) +'.binaryfile'
+    one_params_rate = {'01': 1.71, '02': 1.83, '03': 1.47, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23':1.9, '24': -1}
+    sub_params_rate = {'01': 1.95, '02': 1.92, '03': 1.88, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23':1.9, '24': 1.61}
+    #前はデータをバイナリファイルに入れてなかったからここでデータをセットしてるが今ではそのデータがあるのでそれを読み込む
+    #後は会場ごとにLightGBMの値が違うからそれを変更すること。オッズも(ここにリストを作っといてぶち込めばいけると思う)
+    
+    x_text = '../../binaryfile/x_train_' + stage.zfill(2) +'.binaryfile'
+    y_text = '../../binaryfile/x_train_' + stage.zfill(2) +'.binaryfile'
     try:
-        with open('../../binaryfile/boat01.binaryfile', 'rb') as web:
-            data = pickle.load(web)
+        with open(x_text, 'rb') as web:
+            x_train = pickle.load(web)
         web.close
+
+        with open(y_text, 'rb') as web:
+            y_train = pickle.load(web)
+        web.close
+
     except Exception as e:
         return e
-    warnings.simplefilter('ignore', FutureWarning)
+
+    data = []
+    
+    one_rate = one_params_rate[stage]
+    sub_rate = sub_params_rate[stage]
+    lgb_train = lgb.Dataset(x_train, y_train)
     #データセット
-    learn, result, odds, count = split_train_test(data, list_std, result_std)
-    x_train = learn
-    y_train = result
-    df = real_split(df, list_std)
-    #学習
-    reg_lr = LinearRegression()
-    reg_lr.fit(x_train, y_train.values.ravel())
+    if one_rate > 0:
+        params = {'task': 'train',
+                                    'boosting_type': 'gbdt',
+                                    # 'objective': 'lambdarank', #←ここでランキング学習と指定！
+                                    # 'metric': 'ndcg',   # for lambdarank
+                                    'ndcg_eval_at': [1,2,3,4,5,6],  # 3連単を予測したい
+                                    'max_position': 6,  # 競艇は6位までしかない
+                                    'learning_rate': one_rate, 
+                                    # 'min_data': 1,
+                                    # 'min_data_in_bin': 1,
+        }
+        #学習
+        gbm = lgb.train(params, lgb_train)
+        
+        #決定
+        y_pred = gbm.predict(df)
 
-    #決定
-    y_pred = reg_lr.predict(df)
+        rank = [0, 0, 0, 0, 0, 0]
+        #[2.1, 1.9, 1.3, 4.1, 3.0, 5.0]
+        for i, n in enumerate(sorted(y_pred)): #低い順番に並べ直す　
+            for j, m in enumerate(y_pred):
+                if n == m:
+                    rank[j] = i + 1 
 
-    print(y_pred)
-    rank = [0, 0, 0, 0, 0, 0]
-    #[2.1, 1.9, 1.3, 4.1, 3.0, 5.0]
-    for i, n in enumerate(sorted(y_pred)): #低い順番に並べ直す　
-        for j, m in enumerate(y_pred):
-            if n == m:
-                rank[j] = i + 1 
+        #[3, 2, 1, 5, 4, 6]
+        
+        r_3 = []
+        for i, number in enumerate(rank):
+            if number == 1:
+                r_3.append(i+1)
 
-    #[3, 2, 1, 5, 4, 6]
+        r_3.append(5)
+
+        data.append(r_3)
+
+    #複勝
+    if sub_params_rate > 0:
+        params = {'task': 'train',
+                                    'boosting_type': 'gbdt',
+                                    # 'objective': 'lambdarank', #←ここでランキング学習と指定！
+                                    # 'metric': 'ndcg',   # for lambdarank
+                                    'ndcg_eval_at': [1,2,3,4,5,6],  # 3連単を予測したい
+                                    'max_position': 6,  # 競艇は6位までしかない
+                                    'learning_rate': sub_rate, 
+                                    # 'min_data': 1,
+                                    # 'min_data_in_bin': 1,
+        }
+        #学習
+        gbm = lgb.train(params, lgb_train)
+        
+        #決定
+        y_pred = gbm.predict(df)
+
+        rank = [0, 0, 0, 0, 0, 0]
+        #[2.1, 1.9, 1.3, 4.1, 3.0, 5.0]
+        for i, n in enumerate(sorted(y_pred)): #低い順番に並べ直す　
+            for j, m in enumerate(y_pred):
+                if n == m:
+                    rank[j] = i + 1 
+
+        #[3, 2, 1, 5, 4, 6]
+        
+        r_3 = []
+        for i, number in enumerate(rank):
+            if number == 1:
+                r_3.append(i+1)
+
+        r_3.append(6)
+
+        data.append(r_3)
+
+
     
-    r_3 = []
-    for i, number in enumerate(rank):
-        if number == 1:
-            r_3.append(i+1)
-
-    for i, number in enumerate(rank):
-        if number == 2:
-            r_3.append(i+1)
-    
-    for i, number in enumerate(rank):
-        if number == 3:
-            r_3.append(i+1)
-    print(r_3)
-
-    #3連単とか何を買うか決めている。
-    #0,,
-    r_3.append([2,5])
-
-    
-    return r_3
+    return data
 
 
-
-
-#バイナリーデータから型を変更
-def split_train_test(data, list_std, result_std):
-    learn = pd.DataFrame(index=[])
-    result = pd.DataFrame(index=[])
-    count = 0
-    odds = []
-    er = 0
-    er_tmp = []
-    for n in data:
-        for i, one in enumerate(n):
-            try:
-                if i == 6:
-                    one.append(n[7])
-                    odds.append(one)
-                elif i <= 5:
-                    a = one.pop(-1)
-                    b = one
-                    tmp_learn =  pd.Series(b, index=list_std)
-                    tmp_result = pd.Series(a, index=result_std)
-                    learn = learn.append(tmp_learn, ignore_index=True)
-                    result = result.append(tmp_result, ignore_index=True)
-                    count += 1
-                
-            except Exception as e:
-                er_tmp.append(e)
-                b.insert(9, 1.0)
-                tmp_learn =  pd.Series(b, index=list_std)
-                tmp_result = pd.Series(a, index=result_std)
-                learn = learn.append(tmp_learn, ignore_index=True)
-                result = result.append(tmp_result, ignore_index=True)
-                count += 1
-
-
-    return learn, result, odds, count
-
-def real_split(df, list_std):
-    learn = pd.DataFrame(index=[])
-    for n in df:
-        tmp_learn =  pd.Series(n, index=list_std)
-        learn = learn.append(tmp_learn, ignore_index=True)
-    return learn
 

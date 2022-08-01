@@ -12,6 +12,7 @@ import time
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
 
 #グローバル関数としてステージと何レース目かをおいとく
 
@@ -34,7 +35,7 @@ def Buy_boat(stage):
         rank = predict(df, stage)
 
         #購入
-        selenium_buy(rank, stage, race)
+        buy = selenium_buy(rank, stage, race)
         
     except ValueError as e:
         print('エラーが発生しました。よって{}:{}レースは購入を中止しました。'.format(stage, race))
@@ -46,10 +47,10 @@ def Buy_boat(stage):
         memory_race.append('-')
     else:
         print('{}:{}レース購入完了しました。'.format(stage, race))
-        rank.append(stage)
-        rank.appned(race)
-        memory_race.append(rank)
-        #[[1,2,3,[1,2], '-'], [2,1,3,[1,2], 'stage', 'race']]
+        buy.append(stage)
+        buy.appned(race)
+        memory_race.append(buy)
+        #[[[1,5], [2,6], '-']], [2, 6], 'stage', 'race']]]
     
     buy_notification(race, stage, memory_race)
 
@@ -62,17 +63,19 @@ def day_notification():
             all_money = pickle.load(web)
         web.close
         last_money = all_money[-1]
-        real_money = last_money - money
+        real_money = last_money + money
         all_money.append(real_money)
         figure, ax = plt.subplots() #グラフの定義
         x = [i+1 for i in range(len(all_money))]
         y = all_money
         ax.plot(x,y) 
-        figure.savefig('../../PLT/test.jpg')
+        today = datetime.date.today()
+        yyyymmdd = today.strftime('%Y%m%d')
+        day_text = '../../PLT/' + yyyymmdd + ".jpg"
+        figure.savefig(day_text)
         with open('../../binaryfile/money.binaryfile', 'wb') as web:
             pickle.dump(all_money, web)
         web.close
-        filename = '../../PLT/test.jpg'
 
     except Exception as e:
         print(e)
