@@ -9,6 +9,7 @@ def Get_race_time():
     today_race_time = []
     today = datetime.date.today()
     yyyymmdd = today.strftime('%Y%m%d')
+    #yyyymmdd = '20220804'
 
     try:
         url = "https://www.boatrace.jp/owpc/pc/race/index?hd=" + yyyymmdd
@@ -19,14 +20,18 @@ def Get_race_time():
         found = soup.find_all('ul', class_='textLinks3')
 
     except Exception as e:
+        print(url)
         print(e)
         exit()
     
     now_race = []
     for i in found:
-        url = "https://www.boatrace.jp/"
-        url += i.find('a').get('href')
-        now_race.append(url)
+        try:
+            url = "https://www.boatrace.jp/"
+            url += i.find('a').get('href')
+            now_race.append(url)
+        except AttributeError:
+            continue
 
     for url in now_race:
         race = []
@@ -69,9 +74,9 @@ def Get_race_time():
     #ここで本当は自動入力、時間がないから手動
     #15:17	15:45	16:10	16:35	17:07	17:35	18:03	18:32	19:02	19:33	20:05	20:37
     #5分前に動かす。
-    race = [1, ['15:14', '15:44', '16:00', '16:30', '16:54', '17:22', '17:50', '18:22', '18:52', '19:18', '19:49', '20:36']]
+    #race = [1, ['15:14', '15:44', '16:00', '16:30', '16:54', '17:22', '17:50', '18:22', '18:52', '19:18', '19:49', '20:36']]
     today_race_time = []
-    today_race_time.append(race)
+    today_race_time.append([10, ['15:18', '15:42', '16:06', '16:33', '16:57', '17:28', '17:59', '18:31', '19:03', '19:35', '20:02', '22:02']])
     return today_race_time
     
 def five_ago(text):

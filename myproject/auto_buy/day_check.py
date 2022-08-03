@@ -10,7 +10,7 @@ def day_check(memory_race):
     message ="本日購入したレース\n"
     money = 0
     for race in memory_race:
-        if race[-1] != '-':
+        if race[-1] != '-' and race[-1] != '+':
             today = datetime.date.today()
             yyyymmdd = today.strftime('%Y%m%d')
             stage = str(race[-2])

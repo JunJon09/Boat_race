@@ -9,6 +9,8 @@ def buy_notification(race, stage, memory_race):
     message = "場所:" + str(stage) + ", " + str(race) +"レースの予測\n"
     if memory_race[-1][-1] == '-':
         message += 'エラーが起きたので予測できませんでした。\n\n'
+    elif memory_race[-1][-1] == '+':
+        message += 'ファイルが存在しなかったので予測しませんでした。\n\n'
     else:
         last_data = memory_race[-1]
         print(len(last_data))

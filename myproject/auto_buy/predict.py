@@ -8,31 +8,31 @@ def predict(df, stage):
     result_std = ['順位']
     odds_std = ['オッズ']
     stage = str(stage)
-    one_params_rate = {'01': 1.71, '02': 1.83, '03': 1.47, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23':1.9, '24': -1}
-    sub_params_rate = {'01': 1.95, '02': 1.92, '03': 1.88, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23':1.9, '24': 1.61}
+    one_params_rate = {'01': 1.71, '02': 1.83, '03': 1.47, '04': 1.93, '05': 1.80, '06': 1.66, '07': 1.86, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 1.59, '22': 1.92, '23':1.9, '24': -1}
+    sub_params_rate = {'01': 1.95, '02': 1.92, '03': 1.88, '04': 1.84, '05': 1.75, '06': 1.84, '07': 1.86, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 1.75, '22': 1.94, '23':1.9, '24': 1.61}
     #前はデータをバイナリファイルに入れてなかったからここでデータをセットしてるが今ではそのデータがあるのでそれを読み込む
     #後は会場ごとにLightGBMの値が違うからそれを変更すること。オッズも(ここにリストを作っといてぶち込めばいけると思う)
-    
-    x_text = '../../binaryfile/x_train_' + stage.zfill(2) +'.binaryfile'
-    y_text = '../../binaryfile/x_train_' + stage.zfill(2) +'.binaryfile'
-    try:
-        with open(x_text, 'rb') as web:
-            x_train = pickle.load(web)
-        web.close
-
-        with open(y_text, 'rb') as web:
-            y_train = pickle.load(web)
-        web.close
-
-    except Exception as e:
-        return e
-
     data = []
+    x_text = '../../binaryfile/x_train_' + stage.zfill(2) +'.binaryfile'
+    y_train = '../../binaryfile/y_train_' + stage.zfill(2) +'.binaryfile'
+
+    with open(x_text, 'rb') as web:
+        x_train = pickle.load(web)
+    web.close
+
+    with open(y_train, 'rb') as web:
+        y_train = pickle.load(web)
+    web.close
+
+    #ここでファイルがない時のエラーが発生ここを修正
+
     
-    one_rate = one_params_rate[stage]
-    sub_rate = sub_params_rate[stage]
+    
+    one_rate = one_params_rate[stage.zfill(2)]
+    sub_rate = sub_params_rate[stage.zfill(2)]
     lgb_train = lgb.Dataset(x_train, y_train)
     #データセット
+    #もしデータがない場合returndataが空白になる。
     if one_rate > 0:
         params = {'task': 'train',
                                     'boosting_type': 'gbdt',
@@ -69,7 +69,7 @@ def predict(df, stage):
         data.append(r_3)
 
     #複勝
-    if sub_params_rate > 0:
+    if sub_rate > 0:
         params = {'task': 'train',
                                     'boosting_type': 'gbdt',
                                     # 'objective': 'lambdarank', #←ここでランキング学習と指定！
@@ -93,7 +93,6 @@ def predict(df, stage):
                 if n == m:
                     rank[j] = i + 1 
 
-        #[3, 2, 1, 5, 4, 6]
         
         r_3 = []
         for i, number in enumerate(rank):
@@ -104,7 +103,8 @@ def predict(df, stage):
 
         data.append(r_3)
 
-
+    #data=[1,5,3,6]
+    #配列1番目と3番目の5と6は単勝とかの話
     
     return data
 

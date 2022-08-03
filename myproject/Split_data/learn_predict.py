@@ -2,7 +2,7 @@ from classification import dataSplit
 import pickle
 
 def main():
-    text = 4
+    text = 20
     text = str(text)
     boat_text = "../../binaryfile/boat" + text.zfill(2) + ".binaryfile"
     x_train, x_test, y_train, y_test, y_odds = dataSplit(boat_text)
