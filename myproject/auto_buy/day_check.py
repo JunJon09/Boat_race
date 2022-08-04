@@ -10,11 +10,11 @@ def day_check(memory_race):
     message ="本日購入したレース\n"
     money = 0
     for race in memory_race:
-        if len(race) != 1 and race[4] != '-':
+        if race[-1] != '-' and race[-1] != '+':
             today = datetime.date.today()
             yyyymmdd = today.strftime('%Y%m%d')
-            stage = str(race[4])
-            R = str(race[5])
+            stage = str(race[-2])
+            R = str(race[-1])
             try:
                 url = "https://www.boatrace.jp/owpc/pc/race/raceresult?rno=" + R + "&jcd=" + str(stage.zfill(2)) + "&hd=" + yyyymmdd
                 f =  urllib.request.urlopen(url, timeout=3.5)
@@ -46,70 +46,109 @@ def day_check(memory_race):
                             odds[odds_count].append(int(n))
                 
                 found = soup.find_all('span', class_='numberSet1_number')
-                
                 rank = []
+                
                 rank.append(int(found[0].text.strip()))
                 rank.append(int(found[1].text.strip()))
                 rank.append(int(found[2].text.strip()))
-                result = ranck_check(race, rank)
-                buy = race[3] #買い目
-                finally_result = []
-                
-                for i, r in enumerate(result):
-                    flag = 0
-                    for b in buy:
-                        if r == 1 and i == b:
-                            flag = 1
-                    if flag == 0:
-                        finally_result.append(0)
-                    else:
-                        finally_result.append(1)
-                    
-                count = 0
-
-                money = money - (len(buy) * 100) #購入金額
+                result = []
+                count5 = 0
+                count6 = 0
+                for race_data in race:
+                    if not (type(race_data) is int):
+                        if len(race_data) == 0:
+                            continue
+                        if race_data[1] == 5: #買い目単勝
+                            count5 += 1
+                            result_tmp = []
+                            one = race_data[0]
+                            result_tmp.append(5)
+                            result_tmp.append(one)
+                            tmp = 0
+                            if one == rank[0]:
+                                tmp = 1
+                            result_tmp.append(tmp)
+                            result.append(result_tmp)
+                        elif race_data[1] == 6: #買い目複勝
+                            count6 += 1
+                            result_tmp = []
+                            result_tmp.append(6)
+                            sub = race_data[0]
+                            result_tmp.append(sub)
+                            tmp = ranck_check(sub, rank)
+                            result_tmp.append(tmp)
+                            result.append(result_tmp)
+                #result = [[5, 1], [6, 0]]
+                print(len(result))
+                money = money - (len(result) * 100) #購入金額
                 message = message + str(chenge_number_place(stage)) + "の" + str(R) +"レース結果\n"
-                message += "予測:"+ str(race[0]) + "," + str(race[1]) + "," + str(race[2]) + "\n"
-                message += "買い目"
-                for i in buy:
-                    if i == 0:
-                        message += "三連単,"
-                    if i == 1:
-                        message += "三連複,"
-                    if i == 2:
-                        message += "二連単,"
-                    if i == 3:
-                        message += "二連複,"
-                    if i == 4:
-                        message += "拡張,"
-                    if i == 5:
-                        message += "単勝,"
-                    if i == 6:
-                        message += "複勝,"
-                    message = message[:-1]
-                    message += "\n"
-                message += "結果:"+ str(rank[0]) + "," + str(rank[1]) + "," + str(rank[2]) + "\n"
-                for i, f in enumerate(finally_result):
-                    if f == 1:
-                        money = money + odds[i][1]
-                        if i == 0:
-                            message += "三連単当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 1:
-                            message += "三連複当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 2:
-                            message += "二連単当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 3:
-                            message += "二連複当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 4:
-                            message += "拡張当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 5:
-                            message += "単勝当たり:" + str(odds[i][1]) + "円\n"
-                        if i == 6:
-                            message += "複勝当たり:" + str(odds[i][1]) + "円\n"
-                    else:
-                        count += 1
-                if count == 7:
-                    message += '当たりなし\n'
+                for r in result:
+                    if r[0] == 5:
+                        message += "単勝予測結果\n"
+                        message += "予測1着: " + str(r[1]) + " 結果"
+                        if r[2] == 0:
+                            message += "ハズレ\n"
+                        elif r[2] == 1:
+                            message += "当たり: "
+                            message += str(odds[5][1]) + "円\n"
+                            money += odds[5][1]
+                    if r[0] == 6:
+                        message += "複勝予測の結果\n"
+                        message += "予測1着: " + str(r[1]) + " 結果"
+                        if r[2] == 0:
+                            message += "ハズレ\n"
+                        elif r[2] >= 1:
+                            message += "当たり: "
+                            message += str(odds[6][r[2]]) + "円\n"
+                            money += odds[6][r[2]]
+        
+                if count5 == 0:
+                    message += "単勝狙いはオッズが低いからやめました。\n"
+                if count6 == 0:
+                    message += "複勝狙いはオッズが低いからやめました。\n"
+                # message += "予測:"+ str(race[0]) + "," + str(race[1]) + "," + str(race[2]) + "\n"
+                # message += "買い目"
+                # for i in buy:
+                #     if i == 0:
+                #         message += "三連単,"
+                #     if i == 1:
+                #         message += "三連複,"
+                #     if i == 2:
+                #         message += "二連単,"
+                #     if i == 3:
+                #         message += "二連複,"
+                #     if i == 4:
+                #         message += "拡張,"
+                #     if i == 5:
+                #         message += "単勝,"
+                #     if i == 6:
+                #         message += "複勝,"
+                #     message = message[:-1]
+                #     message += "\n"
+                # message += "結果:"+ str(rank[0]) + "," + str(rank[1]) + "," + str(rank[2]) + "\n"
+                # for i, f in enumerate(finally_result):
+                #     if f == 1:
+                #         money = money + odds[i][1]
+                #         if i == 0:
+                #             message += "三連単当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 1:
+                #             message += "三連複当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 2:
+                #             message += "二連単当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 3:
+                #             message += "二連複当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 4:
+                #             message += "拡張当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 5:
+                #             message += "単勝当たり:" + str(odds[i][1]) + "円\n"
+                #         if i == 6:
+                #             message += "複勝当たり:" + str(odds[i][1]) + "円\n"
+                #     else:
+                #         count += 1
+                # if count == 7:
+                #     message += '当たりなし\n'
+
+
           
             except Exception as e:
                 print(e)
@@ -119,77 +158,78 @@ def day_check(memory_race):
     
     message += "今日の収支合計:"+str(money) +"円"
     
-
+    print(message)
     return message, money
     
     
-
-
-def ranck_check(predict_rank, real_rank):
+def ranck_check(predict, real):
     #1ならあたり['3連単', '三連複', '二連単', '二連複', '拡張(これは実装しない)', '単勝', '複勝']
     #[2,1,3,[1,2], 'stage', 'race']
     #3連単
-    p_rank = []
-    for i, rank in enumerate(predict_rank):
-        if i <=3:
-            p_rank.append(rank)
-    result = []
-    if predict_rank[0] == real_rank[0] and predict_rank[1] == real_rank[1] and predict_rank[2] == real_rank[2]:
-        result.append(1)
-    else:
-        result.append(0)
-    
-    #三連複
-    count = 0
-    for p in p_rank:
-        for r in real_rank:
-            if p == r:
-                count += 1
-    
-    if count == 3:
-        result.append(1)
-    else:
-        result.append(0)
-    
-    #二連単
-    if (predict_rank[0] == real_rank[0]) and (predict_rank[1] == real_rank[1]):
-        result.append(1)
-    else:
-        result.append(0)
-    #二連複
-    count = 0
-    for i,p in enumerate(p_rank):
-        for j,r in enumerate(real_rank):
-           if i<=1 and j<=1:
-            if p == r:
-                count += 1
-    if count == 2:
-        result.append(1)
-    else:
-        result.append(0)
+    # all_result = []
+    # for (predict_rank, real_rank) in zip(predict, real):
+    result = 0
+        # if predict_rank[0] == real_rank[0] and predict_rank[1] == real_rank[1] and predict_rank[2] == real_rank[2]:
+        #     result.append(1)
+        # else:
+        #     result.append(0)
+        
+        # #三連複
+        # count = 0
+        # for i,p in enumerate(predict_rank):
+        #     for j, r in enumerate(real_rank):
+        #         if i<=2 and j<=2:
+        #             if p == r:
+        #                 count += 1
+        
+        # if count == 3:
+        #     result.append(1)
+        # else:
+        #     result.append(0)
+        
+        # #二連単
+        # if (predict_rank[0] == real_rank[0]) and (predict_rank[1] == real_rank[1]):
+        #     result.append(1)
+        # else:
+        #     result.append(0)
+        # #二連複
+        # count = 0
+        # for i,p in enumerate(predict_rank):
+        #     for j,r in enumerate(real_rank):
+        #         if i<=1 and j<=1:
+        #             if p == r:
+        #                 count += 1
+        # if count == 2:
+        #     result.append(1)
+        # else:
+        #     result.append(0)
 
-    #拡張
-    result.append(0)
+        #拡張
+        # if (predict_rank[0] == real_rank[0] and predict_rank[1] == real_rank[1]) or (predict_rank[0] == real_rank[1] and predict_rank[1] == real_rank[0]):
+        #     result.append(1)
+        # elif (predict_rank[0] == real_rank[0] and predict_rank[2] == real_rank[2]) or (predict_rank[0] == real_rank[2] and predict_rank[2] == real_rank[0]):
+        #     result.append(2)
+        # elif (predict_rank[1] == real_rank[1] and predict_rank[2] == real_rank[2]) or (predict_rank[1] == real_rank[2] and predict_rank[2] == real_rank[1]):
+        #     result.append(3)
+        # else:
+        #     result.append(0)
+        # result.append(0)
 
-    #単勝
-    if predict_rank[0] == real_rank [0]:
-        result.append(1)
-    else:
-        result.append(0)
+    # #単勝
+    # if predict == real[0]:
+    #     result = 1
+    # else:
+    #     result = 0
     
     #複勝
-    count = 0
-    for i, r in enumerate(real_rank):
-        if i<=1:
-            if r == predict_rank[0]:
-                count += 1
-    
-    if count == 1:
-        result.append(1)
+    if predict == real[0]:
+        result = 1
+    elif predict == real[1]:
+        result = 2
     else:
-        result.append(1)
+        result = 0
+        
     return result
-
 
 def chenge_number_place(number):
     text = ""
@@ -245,7 +285,8 @@ def chenge_number_place(number):
 
     return text
 
-# if __name__ == '__main__':
-#     #[[1,2,3,[1,2], '-'], [2,1,3,[1,2], 'stage', 'race']]
-#     memory_race = [[1,2,3,[0], 1, 1], [4,3,5,[6], 1, 12]]
-#     day_check(memory_race)
+
+if __name__ == '__main__':
+    #[[1,2,3,[1,2], '-'], [2,1,3,[1,2], 'stage', 'race']]
+    memory_race = [[[1, 5],[1, 6], 1, 9], [[3, 5], 1, 10]]
+    day_check(memory_race)

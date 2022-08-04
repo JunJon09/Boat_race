@@ -12,6 +12,8 @@ import time
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
+import traceback
 
 #グローバル関数としてステージと何レース目かをおいとく
 
@@ -25,6 +27,7 @@ def Buy_boat(stage):
     print('舟券を買うためのプログラムが実行されました。')
     stage_race[stage] += 1
     race = stage_race[stage]
+    buy = []
     global memory_race
     #レースデータを取得する。
     try:
@@ -32,24 +35,35 @@ def Buy_boat(stage):
 
         #予測をする。
         rank = predict(df, stage)
+        print(rank, '---')
+        if len(rank) == 0:
+            raise ValueError()
+        #rankが空白の時がある。まだデータを取ってきてないもの
 
         #購入
-        selenium_buy(rank, stage, race)
+        #buy = selenium_buy(rank, stage, race)
+        print(buy, 'aaaa')
         
     except ValueError as e:
         print('エラーが発生しました。よって{}:{}レースは購入を中止しました。'.format(stage, race))
-        rank.append('-')
-        memory_race.append(rank)
+        buy.append('-')
+        memory_race.append(buy)
+        print(traceback.format_exc())
+    except  FileNotFoundError:
+        buy.append('+')
+        print('ファイルが存在しませんでした')
+        memory_race.append(buy)
     except Exception as e:
-        print('エラーが発生しました。よって{}:{}レースは購入を中止しました。'.format(stage, race))
+        print('エラーが発生しましたよって{}:{}レースは購入を中止しました。'.format(stage, race))
         print(e)
         memory_race.append('-')
+        print(traceback.format_exc())
     else:
         print('{}:{}レース購入完了しました。'.format(stage, race))
-        rank.append(stage)
-        rank.appned(race)
-        memory_race.append(rank)
-        #[[1,2,3,[1,2], '-'], [2,1,3,[1,2], 'stage', 'race']]
+        buy.append(stage)
+        buy.append(race)
+        memory_race.append(buy)
+        #[[[1,5], [2,6], '-']], [2, 6], 'stage', 'race']]]
     
     buy_notification(race, stage, memory_race)
 
@@ -62,23 +76,32 @@ def day_notification():
             all_money = pickle.load(web)
         web.close
         last_money = all_money[-1]
-        real_money = last_money - money
+        real_money = last_money + money
         all_money.append(real_money)
         figure, ax = plt.subplots() #グラフの定義
         x = [i+1 for i in range(len(all_money))]
         y = all_money
         ax.plot(x,y) 
-        figure.savefig('../../PLT/test.jpg')
+        today = datetime.date.today()
+        yyyymmdd = today.strftime('%Y%m%d')
+        day_text = '../../PLT/' + yyyymmdd + ".jpg"
+        figure.savefig(day_text)
         with open('../../binaryfile/money.binaryfile', 'wb') as web:
             pickle.dump(all_money, web)
         web.close
-        filename = '../../PLT/test.jpg'
 
+        #収支合計をテキストに代入
+        file_text = "../../Result/"  + "毎日収支.txt"
+        text_data += yyyymmdd + "日の収支: " + str(money) + "円, " + "合計収支: " + str(real_money) + "円\n"
+        with open(file_text, mode='a') as f:
+            f.write(text_data)
+        f.close
     except Exception as e:
         print(e)
         pass
     
     LINENotifyBot(message, filename)
+    exit(0)
     
     
 

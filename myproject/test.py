@@ -173,16 +173,30 @@ def ranck_check(predict, real):
     
 
 if __name__ == '__main__':
-    predict, result = sample()
-    tmp = []
-    for i in predict:
-        tmp.append(rank_sort(sorted(i), i))
+    all_money = [0]
+    with open('../binaryfile/money.binaryfile', 'wb') as web:
+            pickle.dump(all_money, web)
+    web.close
+    text_data = "収支結果\n"
+    file_text = "../Result/"  + "毎日収支.txt"
+    with open(file_text, mode='w') as f:
+        f.write(text_data)
     
-    for (a, b) in zip(tmp, result):
-        for (c, d) in zip(a, b):
-            if c!= d:
-                print('error!')
-                print(a, b)
+    text_data = ""
+    money = 100
+    with open(file_text, mode='a') as f:
+        text_data = "20220803日, 収支" + str(money) + "円, " + "合計: " + str(100*10) + "円"
+        f.write(text_data)
+    # predict, result = sample()
+    # tmp = []
+    # for i in predict:
+    #     tmp.append(rank_sort(sorted(i), i))
+    
+    # for (a, b) in zip(tmp, result):
+    #     for (c, d) in zip(a, b):
+    #         if c!= d:
+    #             print('error!')
+    #             print(a, b)
         
     
 

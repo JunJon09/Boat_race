@@ -11,18 +11,18 @@ if __name__ == '__main__':
     Input_schedule(race_time)
     
 
-def main_auto():
-    #今日がどこのレースで何時からか行うかとってくる。
-    race_time = Get_race_time()
+# def main_auto():
+#     #今日がどこのレースで何時からか行うかとってくる。
+#     race_time = Get_race_time()
 
-    #日にちをもとに自動売買を行う
-    Input_schedule(race_time)
+#     #日にちをもとに自動売買を行う
+#     Input_schedule(race_time)
 
-schedule.every().day.at("23:48").do(main_auto)
-print('k')
+# schedule.every().day.at("23:48").do(main_auto)
+# print('k')
 
 
-while True:
-  schedule.run_pending()
-  time.sleep(1000)
-  print('r')
+# while True:
+#   schedule.run_pending()
+#   time.sleep(1000)
+#   print('r')
