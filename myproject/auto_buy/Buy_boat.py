@@ -2,6 +2,7 @@
 from fileinput import filename
 from turtle import left
 from Get_race_info import Get_race_info
+from myproject.Auto_buy.tweet_bot import tweet_bot
 from selenium_buy import selenium_buy
 from buy_notification import buy_notification
 from predict import predict
@@ -14,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import traceback
-
+from tweet_bot import tweet_bot
 #グローバル関数としてステージと何レース目かをおいとく
 
 
@@ -41,9 +42,9 @@ def Buy_boat(stage):
         #rankが空白の時がある。まだデータを取ってきてないもの
 
         #購入
-        #buy = selenium_buy(rank, stage, race)
+        buy = selenium_buy(rank, stage, race)
         print(buy, 'aaaa')
-        
+
     except ValueError as e:
         print('エラーが発生しました。よって{}:{}レースは購入を中止しました。'.format(stage, race))
         buy.append('-')
@@ -59,12 +60,15 @@ def Buy_boat(stage):
         memory_race.append('-')
         print(traceback.format_exc())
     else:
-        print('{}:{}レース購入完了しました。'.format(stage, race))
+        if len(buy) == 0:
+            print('{}:{}オッズが低いので購入しませんでした'.format(stage, race))
+        else:
+            print('{}:{}レース購入完了しました。'.format(stage, race))
         buy.append(stage)
         buy.append(race)
+        print(buy)
         memory_race.append(buy)
-        #[[[1,5], [2,6], '-']], [2, 6], 'stage', 'race']]]
-    
+        #[[1,5], [2,6], '-'], [[2, 6], 'stage', 'race']
     buy_notification(race, stage, memory_race)
 
 #1日の収支をラインに知らせる。
@@ -78,10 +82,14 @@ def day_notification():
         last_money = all_money[-1]
         real_money = last_money + money
         all_money.append(real_money)
+        message += "\n総合収支:" + str(real_money) + "円です\n"
         figure, ax = plt.subplots() #グラフの定義
+        plt.xlabel('Day') #X軸ラベル
+        plt.ylabel('Profit') #Y軸ラベル 
+        plt.title("Recovery_rate")
         x = [i+1 for i in range(len(all_money))]
         y = all_money
-        ax.plot(x,y) 
+        ax.plot(x,y)
         today = datetime.date.today()
         yyyymmdd = today.strftime('%Y%m%d')
         day_text = '../../PLT/' + yyyymmdd + ".jpg"
@@ -92,7 +100,7 @@ def day_notification():
 
         #収支合計をテキストに代入
         file_text = "../../Result/"  + "毎日収支.txt"
-        text_data += yyyymmdd + "日の収支: " + str(money) + "円, " + "合計収支: " + str(real_money) + "円\n"
+        text_data = yyyymmdd + "日の収支: " + str(money) + "円, " + "合計収支: " + str(real_money) + "円\n"
         with open(file_text, mode='a') as f:
             f.write(text_data)
         f.close
@@ -100,7 +108,12 @@ def day_notification():
         print(e)
         pass
     
-    LINENotifyBot(message, filename)
+    LINENotifyBot(message, day_text)
+    try:
+        tweet_bot(message)
+    except Exception as e:
+        print(e, 'ツイッターでエラーが起きてます')
+        pass
     exit(0)
     
     
@@ -112,11 +125,12 @@ def Input_schedule(race_time):
     global stage_race
     memory_race = []
     stage_race = [0 for i in range(25)]
+    
     for data in race_time:
         print(data)
         for text in data[1]:
             schedule.every().day.at(text).do(Buy_boat, stage=data[0])
-    schedule.every().days.at("23:00").do(day_notification)
+    schedule.every().days.at("17:26").do(day_notification)
     while True:
         schedule.run_pending()
         time.sleep(1)
@@ -124,4 +138,5 @@ def Input_schedule(race_time):
 
 
 if __name__ == '__main__':
-    Buy_boat()
+    a = [[[1,5], [2,6], 3, 10], [[], 5, 10]]
+    buy_notification(10, 2, a)

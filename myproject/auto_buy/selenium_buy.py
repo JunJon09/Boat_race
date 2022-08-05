@@ -11,8 +11,8 @@ import re
 def selenium_buy(rank, stage, race):
     driver = webdriver.Chrome('./chromedriver')  #WEBブラウザの起動
     tmp = []
-    one_money_value = {'01': 2.9, '02': 2.9, '03': 2.9, '04': 2.9, '05': 2.7, '06': 2.8, '07': 2.7, '08': 100, '09': 100, '10': 100, '11': 100, '12': 100, '13': 100, '14': 100, '15': 100, '16': 100, '17': 100, '18': 100, '19': 100, '20': 100, '21': 2.7, '22': 2.6, '23':2.8, '24': 100}
-    sub_money_value = {'01': 1.7, '02': 2.4, '03': 2.0, '04': 2.1, '05': 2.2, '06': 1.7, '07': 1.6, '08': 100, '09': 100, '10': 100, '11': 100, '12': 100, '13': 100, '14': 100, '15': 100, '16': 100, '17': 100, '18': 100, '19': 100, '20': 100, '21': 2.3, '22': 1.5, '23':1.9, '24': 2.1}
+    one_money_value = {'01': 2.9, '02': 2.9, '03': 2.9, '04': 2.9, '05': 2.7, '06': 2.8, '07': 2.7, '08': 100, '09': 100, '10': 100, '11': 100, '12': 100, '13': 100, '14': 100, '15': 100, '16': 100, '17': 100, '18': 100, '19': 2.9, '20': 100, '21': 2.7, '22': 2.6, '23':2.8, '24': 100}
+    sub_money_value = {'01': 1.7, '02': 2.4, '03': 2.0, '04': 2.1, '05': 2.2, '06': 1.7, '07': 1.6, '08': 100, '09': 100, '10': 100, '11': 100, '12': 100, '13': 100, '14': 100, '15': 100, '16': 100, '17': 100, '18': 1.7, '19': 2.5, '20': 100, '21': 2.3, '22': 1.5, '23':1.9, '24': 2.1}
     one_money = one_money_value[str(stage).zfill(2)]
     sub_money = sub_money_value[str(stage).zfill(2)]
     for i in range(3):
@@ -73,10 +73,12 @@ def selenium_buy(rank, stage, race):
             # # mail.submit()
             # Bet_append = driver.find_element("id", "regAmountBtn")
             # Bet_append.click()
-        
+            flag = 0
             time.sleep(3)
             money = driver.find_element("id", "amount")
+            money.clear()
             money.send_keys("1")
+            
             for r in rank:
                 if r[1] == 5: #単勝
                     one_win = driver.find_element("id", "betkati1")
@@ -93,7 +95,8 @@ def selenium_buy(rank, stage, race):
                         Bet_append = driver.find_element("id", "regAmountBtn")
                         Bet_append.click()
                         tmp.append(r[0])
-                        tmp.append(5)              
+                        tmp.append(5)
+                        flag = 1              
                     
                 elif r[1] == 6: #複勝
                     sub_win = driver.find_element("id", "betkati2")
@@ -113,6 +116,9 @@ def selenium_buy(rank, stage, race):
                         Bet_append.click()
                         tmp.append(r[0])
                         tmp.append(6)
+                        flag = 1
+            if flag == 0:
+                return tmp
             voting = driver.find_elements(By.CLASS_NAME, "btnSubmit ")
             #
             #driver.find_element_by_xpath('//*[@id="betList"]/div[3]/div[3]')
@@ -160,8 +166,8 @@ def selenium_buy(rank, stage, race):
     return buy
 
 if __name__ == '__main__':
-    rank_1 = [[2, 5],[1, 6]]
-    buy = selenium_buy(rank_1, 1, 5)
+    rank_1 = [[2, 5],[3, 6]]
+    buy = selenium_buy(rank_1, 2, 5)
     buy.append(1)
     buy.append(12)
     print(buy)

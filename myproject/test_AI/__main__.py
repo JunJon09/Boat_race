@@ -4,7 +4,7 @@ import lightgbm as lgb
 from matplotlib.pyplot import text
 
 def main():
-    text = 20
+    text = 8
     text = str(text)
     x_train_text = "../../binaryfile/x_train_" + text.zfill(2) + ".binaryfile"
     y_train_text = "../../binaryfile/y_train_" + text.zfill(2) + ".binaryfile"

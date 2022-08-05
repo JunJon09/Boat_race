@@ -10,7 +10,7 @@ def day_check(memory_race):
     message ="本日購入したレース\n"
     money = 0
     for race in memory_race:
-        if race[-1] != '-' and race[-1] != '+':
+        if race[-1] != '-' and race[-1] != '+' and len(race) > 2:
             today = datetime.date.today()
             yyyymmdd = today.strftime('%Y%m%d')
             stage = str(race[-2])
@@ -289,4 +289,5 @@ def chenge_number_place(number):
 if __name__ == '__main__':
     #[[1,2,3,[1,2], '-'], [2,1,3,[1,2], 'stage', 'race']]
     memory_race = [[[1, 5],[1, 6], 1, 9], [[3, 5], 1, 10]]
+    memory_race = [['+'], [21, 11], ['+'], [18, 11], [[6, 5], 2, 7], ['+'], [[3, 5], 4, 5], ['+'], ['+'], ['+'], ['+'], [[1, 6], 2, 8], [21, 12], [18, 12], ['-'], ['+'], ['+'], ['+'], ['+'], ['+'], [[1, 5], 2, 9], ['+'], [[3, 5], 4, 7], ['+']]
     day_check(memory_race)
