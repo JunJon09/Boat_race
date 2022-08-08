@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from tweet_bot import tweet_bot
 
 def buy_notification(race, stage, memory_race):
-    message = "場所:" + str(stage) + ", " + str(race) +"レースの予測\n"
+    message = str(chenge_number_place(stage))+"競艇場" + ", " + str(race) +"レースの予測\n"
     if memory_race[-1][-1] == '-':
         message += 'エラーが起きたので予測できませんでした。\n\n'
     elif memory_race[-1][-1] == '+':
@@ -108,7 +108,59 @@ def buy_notification(race, stage, memory_race):
     #             print(e)
     #             message += '前の結果でエラーが起きました。'
             
+def chenge_number_place(number):
+    text = ""
+    number = int(number)
+    if number == 1:
+        text = "桐生"
+    if number == 2:
+        text = "戸田"
+    if number == 3:
+        text = "江戸川"
+    if number == 4:
+        text = "平和島"
+    if number == 5:
+        text = "多摩川"
+    if number == 6:
+        text = "浜名湖"
+    if number == 7:
+        text = "蒲郡"
+    if number == 8:
+        text = "常滑"
+    if number == 9:
+        text = "津"
+    if number == 10:
+        text = "三国"
+    if number == 11:
+        text = "びわこ"
+    if number == 12:
+        text = "住之江"
+    if number == 13:
+        text = "尼崎"
+    if number == 14:
+        text = "鳴門"
+    if number == 15:
+        text = "丸亀"
+    if number == 16:
+        text = "児島"
+    if number == 17:
+        text = "宮島"
+    if number == 18:
+        text = "徳山"
+    if number == 19:
+        text = "下関"
+    if number == 20:
+        text = "若松"
+    if number == 21:
+        text = "芦屋" 
+    if number == 22:
+        text = "福岡"
+    if number == 23:
+        text = "唐津"
+    if number == 24: 
+        text = "大村"
 
+    return text
     
     
 if __name__ == '__main__':

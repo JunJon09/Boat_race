@@ -83,7 +83,7 @@ def five_ago(text):
     day = text.split(':')
     M = day[1]
     M = int(M)
-    M -= 2
+    M -= 1
     H = day[0]
     if M < 0:
         H = int(H)

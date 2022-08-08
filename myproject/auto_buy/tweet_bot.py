@@ -15,3 +15,6 @@ def tweet_bot(message="エラー"):
     auth = tweepy.Client(consumer_key=ck, consumer_secret=cs, access_token=at, access_token_secret=ats)
     auth.create_tweet(text=message)
     print("ee")
+
+if __name__ == '__main__':
+    tweet_bot()

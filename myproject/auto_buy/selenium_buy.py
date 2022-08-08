@@ -110,7 +110,7 @@ def selenium_buy(rank, stage, race):
                     two = money_odds[4:]
                     print(one)
                     print(two)
-                    money_odds = (float(one) + float(two))/2
+                    money_odds = float(two)
                     if 1.0 <= money_odds and  sub_money <= money_odds:
                         Bet_append = driver.find_element("id", "regAmountBtn")
                         Bet_append.click()
