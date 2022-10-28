@@ -12,3 +12,6 @@ LightBGMを使用して競艇の順位を予想する
   - Test_AI (Light GBMの値を決めている)
   - Split_data (データの加工)
 - PLT (収支)
+
+詳しい概要結果などはこちらから
+https://drive.google.com/file/d/11mnsA2qXpJyB2wl0ctyt4eL4lTY91uG2/view?usp=sharing
