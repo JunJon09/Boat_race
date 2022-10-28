@@ -2,6 +2,13 @@
 
 # Features
 
-LightBGMを使用して競艇の順位を予測する
-予測を基に自動購入をする
+LightBGMを使用して競艇の順位を予想する
+予想を基に自動購入をする
 
+# ファイル構成
+- myproject (スクレピングから自動購入を行うプログラム)
+  - AI_learn (AIについて)
+  - Auto_buy (AIの予想を基に自動購入)
+  - Test_AI (Light GBMの値を決めている)
+  - Split_data (データの加工)
+- PLT (収支)
